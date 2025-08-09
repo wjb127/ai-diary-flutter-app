@@ -1,11 +1,14 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
-// Optional: verify user with supabase-js v2 using the forwarded Authorization header
+// Verify user with supabase-js v2 using forwarded Authorization header
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
+// These two are provided by the Supabase Edge Functions runtime by default
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
+
+// Custom secret you set in Edge Functions → Secrets
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
 
 serve(async (req) => {
@@ -17,21 +20,24 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization') ?? ''
 
-    // Create a supabase client that forwards the user's JWT for RLS-aware calls if needed
-    const supabase = (SUPABASE_URL && SERVICE_ROLE_KEY)
-      ? createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-          global: { headers: { Authorization: authHeader } },
-        })
-      : null
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return new Response(JSON.stringify({ error: 'Supabase runtime env is missing.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      })
+    }
 
-    if (supabase) {
-      const { data: { user }, error } = await supabase.auth.getUser()
-      if (error || !user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401,
-        })
-      }
+    // RLS-aware client using anon key + forwarded JWT
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    })
+
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
     }
 
     const { title, content } = await req.json()
