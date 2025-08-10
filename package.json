@@ -1,0 +1,7 @@
+{
+  "name": "ai-diary-flutter-app",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Flutter build handled by Vercel'"
+  }
+}
