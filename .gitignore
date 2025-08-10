@@ -31,7 +31,14 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+# /build/  # Vercel 배포를 위해 주석 처리
+/build/app/
+/build/ios/
+/build/macos/
+/build/linux/
+/build/windows/
+/build/android/
+# /build/web/  # Web 빌드는 커밋에 포함
 
 # Symbolication related
 app.*.symbols
