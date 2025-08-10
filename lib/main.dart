@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/main_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'services/auth_service.dart';
+import 'services/localization_service.dart';
 import 'widgets/responsive_wrapper.dart';
 
 const String kSupabaseUrl = String.fromEnvironment(
@@ -45,7 +48,12 @@ void main() async {
     debugPrint('익명 로그인 실패: $e');
   }
   
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => LocalizationService(),
+      child: MyApp(),
+    ),
+  );
 }
 
 final _router = GoRouter(
@@ -84,39 +92,54 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'AI 일기장',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        primaryColor: const Color(0xFF6366F1),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        fontFamily: 'Pretendard',
-        appBarTheme: const AppBarTheme(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Color(0xFF1E293B),
-          centerTitle: true,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF6366F1),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+    return Consumer<LocalizationService>(
+      builder: (context, localizationService, child) {
+        return MaterialApp.router(
+          title: 'AI 일기장',
+          locale: Locale(localizationService.currentLanguage),
+          localizationsDelegates: const [
+            AppLocalizationsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('ko', ''),
+            Locale('en', ''),
+          ],
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            primaryColor: const Color(0xFF6366F1),
+            scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+            fontFamily: 'Pretendard',
+            appBarTheme: const AppBarTheme(
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              foregroundColor: Color(0xFF1E293B),
+              centerTitle: true,
             ),
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              ),
+            ),
+            cardTheme: CardTheme(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              color: Colors.white,
+            ),
           ),
-        ),
-        cardTheme: CardTheme(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          color: Colors.white,
-        ),
-      ),
-      routerConfig: _router,
+          routerConfig: _router,
+        );
+      },
     );
   }
 }

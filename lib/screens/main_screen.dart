@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../services/localization_service.dart';
 
 class MainScreen extends StatefulWidget {
   final Widget child;
@@ -48,54 +50,60 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = 3;
     }
 
-    return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.home_outlined,
-                  activeIcon: Icons.home,
-                  label: '홈',
-                  index: 0,
-                ),
-                _buildNavItem(
-                  icon: Icons.edit_outlined,
-                  activeIcon: Icons.edit,
-                  label: 'AI일기장',
-                  index: 1,
-                ),
-                _buildNavItem(
-                  icon: Icons.person_outline,
-                  activeIcon: Icons.person,
-                  label: '프로필',
-                  index: 2,
-                ),
-                _buildNavItem(
-                  icon: Icons.star_outline,
-                  activeIcon: Icons.star,
-                  label: '구독',
-                  index: 3,
+    return Consumer<LocalizationService>(
+      builder: (context, localizationService, child) {
+        final localizations = AppLocalizations(localizationService.currentLanguage);
+        
+        return Scaffold(
+          body: widget.child,
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
                 ),
               ],
             ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(
+                      icon: Icons.home_outlined,
+                      activeIcon: Icons.home,
+                      label: localizations.navHome,
+                      index: 0,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.edit_outlined,
+                      activeIcon: Icons.edit,
+                      label: localizations.navDiary,
+                      index: 1,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.person_outline,
+                      activeIcon: Icons.person,
+                      label: localizations.navProfile,
+                      index: 2,
+                    ),
+                    _buildNavItem(
+                      icon: Icons.star_outline,
+                      activeIcon: Icons.star,
+                      label: localizations.navSubscription,
+                      index: 3,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

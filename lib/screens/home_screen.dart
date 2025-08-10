@@ -1,42 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../services/localization_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                
-                // 헤더 섹션
-                Column(
+    return Consumer<LocalizationService>(
+      builder: (context, localizationService, child) {
+        final localizations = AppLocalizations(localizationService.currentLanguage);
+        
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '안녕하세요! 👋',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1E293B),
-                      ),
+                    const SizedBox(height: 20),
+                    
+                    // 언어 전환 버튼
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => localizationService.toggleLanguage(),
+                              borderRadius: BorderRadius.circular(25),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      localizationService.isKorean ? '🇰🇷' : '🇺🇸',
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      localizationService.isKorean ? 'KOR' : 'ENG',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF6366F1),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.language,
+                                      size: 18,
+                                      color: const Color(0xFF6366F1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'AI가 당신의 일상을 특별한 추억으로 만들어드려요',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: const Color(0xFF64748B),
-                        height: 1.5,
-                      ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // 헤더 섹션
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations.greeting,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          localizations.subtitle,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: const Color(0xFF64748B),
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
                 
                 const SizedBox(height: 40),
                 
@@ -71,9 +136,9 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'AI 일기장',
-                        style: TextStyle(
+                      Text(
+                        localizations.appTitle,
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -81,7 +146,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '당신의 일상을 아름다운 추억으로',
+                        localizations.appSubtitle,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withValues(alpha: 0.9),
@@ -96,7 +161,7 @@ class HomeScreen extends StatelessWidget {
                 
                 // 기능 소개 카드들
                 Text(
-                  '어떻게 작동하나요?',
+                  localizations.howItWorksTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1E293B),
@@ -107,8 +172,8 @@ class HomeScreen extends StatelessWidget {
                 
                 _buildFeatureCard(
                   icon: Icons.edit_outlined,
-                  title: '자유롭게 작성하세요',
-                  description: '오늘 있었던 일을 자유롭게 작성해보세요.\n완벽하지 않아도 괜찮아요!',
+                  title: localizations.feature1Title,
+                  description: localizations.feature1Description,
                   color: const Color(0xFF10B981),
                 ),
                 
@@ -116,8 +181,8 @@ class HomeScreen extends StatelessWidget {
                 
                 _buildFeatureCard(
                   icon: Icons.auto_awesome,
-                  title: 'AI가 각색해드려요',
-                  description: '인공지능이 당신의 일상을 따뜻하고\n아름다운 추억으로 변환해줍니다.',
+                  title: localizations.feature2Title,
+                  description: localizations.feature2Description,
                   color: const Color(0xFF6366F1),
                 ),
                 
@@ -125,8 +190,8 @@ class HomeScreen extends StatelessWidget {
                 
                 _buildFeatureCard(
                   icon: Icons.bookmark_outline,
-                  title: '소중한 추억 보관',
-                  description: '각색된 일기들은 안전하게 보관되어\n언제든 다시 읽어볼 수 있어요.',
+                  title: localizations.feature3Title,
+                  description: localizations.feature3Description,
                   color: const Color(0xFFF59E0B),
                 ),
                 
@@ -144,9 +209,9 @@ class HomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text(
-                      '일기 작성 시작하기',
-                      style: TextStyle(
+                    child: Text(
+                      localizations.startWritingButton,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
@@ -156,11 +221,13 @@ class HomeScreen extends StatelessWidget {
                 ),
                 
                 const SizedBox(height: 20),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
