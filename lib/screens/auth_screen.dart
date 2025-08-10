@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
 
@@ -107,6 +108,54 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('회원가입 실패: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await _authService.signInWithGoogle();
+      if (mounted) {
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('구글 로그인 실패: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await _authService.signInWithApple();
+      if (mounted) {
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('애플 로그인 실패: ${e.toString().replaceAll('Exception: ', '')}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -325,7 +374,106 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     ),
             ),
           ),
-          const SizedBox(height: 16),
+          
+          const SizedBox(height: 24),
+          
+          // 구분선
+          Row(
+            children: [
+              Expanded(child: Divider(color: Colors.grey.shade300)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  '또는',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              Expanded(child: Divider(color: Colors.grey.shade300)),
+            ],
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // 구글 로그인
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: _isLoading ? null : _handleGoogleSignIn,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFFE2E8F0)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                backgroundColor: Colors.white,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/google_logo.png',
+                    height: 20,
+                    width: 20,
+                    errorBuilder: (context, error, stackTrace) => 
+                        const Icon(Icons.g_mobiledata, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Google로 계속하기',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // 애플 로그인 (iOS에서만 표시)
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: OutlinedButton(
+                onPressed: _isLoading ? null : _handleAppleSignIn,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.black,
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.apple, color: Colors.white, size: 20),
+                    SizedBox(width: 12),
+                    Text(
+                      'Apple로 계속하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+            const SizedBox(height: 24),
+          
+          if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS)
+            const SizedBox(height: 24),
+          
           TextButton(
             onPressed: () {
               // TODO: 비밀번호 재설정 기능

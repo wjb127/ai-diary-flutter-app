@@ -58,6 +58,10 @@ dependencies:
   
   # Icons
   flutter_svg: ^2.0.10+1
+  
+  # Social Auth
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.3
 
 dev_dependencies:
   flutter_test:
