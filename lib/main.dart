@@ -8,6 +8,7 @@ import 'screens/diary_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'services/auth_service.dart';
+import 'widgets/responsive_wrapper.dart';
 
 const String kSupabaseUrl = String.fromEnvironment(
   'SUPABASE_URL',
@@ -50,7 +51,9 @@ void main() async {
 final _router = GoRouter(
   routes: [
     ShellRoute(
-      builder: (context, state, child) => MainScreen(child: child),
+      builder: (context, state, child) => ResponsiveWrapper(
+        child: MainScreen(child: child),
+      ),
       routes: [
         GoRoute(
           path: '/',
