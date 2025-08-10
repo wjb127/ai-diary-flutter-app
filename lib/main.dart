@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'screens/main_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
@@ -8,14 +9,30 @@ import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'services/auth_service.dart';
 
+const String kSupabaseUrl = String.fromEnvironment(
+  'SUPABASE_URL',
+  defaultValue: 'https://example.supabase.co',
+);
+const String kSupabaseAnonKey = String.fromEnvironment(
+  'SUPABASE_ANON_KEY',
+  defaultValue: 'public-anon-key-placeholder',
+);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Supabase 초기화 (실제 URL과 KEY는 나중에 설정)
-  await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
-  );
+  // 한국어 날짜 포맷 초기화
+  await initializeDateFormatting('ko_KR', null);
+  
+  // Supabase 초기화 (dart-define 값이 없으면 플레이스홀더로 초기화)
+  try {
+    await Supabase.initialize(
+      url: kSupabaseUrl,
+      anonKey: kSupabaseAnonKey,
+    );
+  } catch (e) {
+    debugPrint('Supabase 초기화 실패: $e');
+  }
   
   // 앱 시작 시 익명 로그인
   try {

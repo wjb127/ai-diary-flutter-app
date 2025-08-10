@@ -343,7 +343,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   void initState() {
     super.initState();
     // 앱 진입 시 오늘 날짜 일기 로드
-    _loadDiaryForDate(_selectedDay);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDiaryForDate(_selectedDay);
+    });
   }
 
   Future<void> _loadDiaryForDate(DateTime date) async {
