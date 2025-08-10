@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,6 +10,7 @@ import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
+import 'screens/auth_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
 import 'widgets/responsive_wrapper.dart';
@@ -38,15 +40,7 @@ void main() async {
     debugPrint('Supabase 초기화 실패: $e');
   }
   
-  // 앱 시작 시 익명 로그인
-  try {
-    final authService = AuthService();
-    if (authService.currentUser == null) {
-      await authService.signInAnonymously();
-    }
-  } catch (e) {
-    debugPrint('익명 로그인 실패: $e');
-  }
+  // 익명 로그인 제거 - 실제 로그인/회원가입만 사용
   
   runApp(
     ChangeNotifierProvider(
@@ -57,7 +51,29 @@ void main() async {
 }
 
 final _router = GoRouter(
+  initialLocation: '/auth',
+  redirect: (context, state) {
+    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
+    final isAuthRoute = state.matchedLocation == '/auth';
+    
+    if (!isLoggedIn && !isAuthRoute) {
+      return '/auth';
+    }
+    
+    if (isLoggedIn && isAuthRoute) {
+      return '/';
+    }
+    
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: '/auth',
+      name: 'auth',
+      builder: (context, state) => const ResponsiveWrapper(
+        child: AuthScreen(),
+      ),
+    ),
     ShellRoute(
       builder: (context, state, child) => ResponsiveWrapper(
         child: MainScreen(child: child),
@@ -86,7 +102,28 @@ final _router = GoRouter(
       ],
     ),
   ],
+  refreshListenable: GoRouterRefreshStream(
+    Supabase.instance.client.auth.onAuthStateChange,
+  ),
 );
+
+// GoRouter refresh를 위한 헬퍼 클래스
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<AuthState> stream) {
+    notifyListeners();
+    _subscription = stream.listen((_) {
+      notifyListeners();
+    });
+  }
+
+  late final StreamSubscription<AuthState> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

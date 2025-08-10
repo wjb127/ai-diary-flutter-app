@@ -1,34 +1,89 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/diary_model.dart';
 
 class DiaryService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
+  // 로깅 헬퍼 메서드
+  void _log(String message, [dynamic data]) {
+    final timestamp = DateTime.now().toIso8601String();
+    if (kDebugMode) {
+      print('🔍 [$timestamp] DiaryService: $message');
+      if (data != null) {
+        print('📊 Data: $data');
+      }
+    }
+    // 웹에서도 콘솔에 출력
+    if (kIsWeb) {
+      // ignore: avoid_print
+      print('🌐 [WEB LOG] $message ${data != null ? '| Data: $data' : ''}');
+    }
+  }
+
+  void _logError(String message, dynamic error, [StackTrace? stackTrace]) {
+    final timestamp = DateTime.now().toIso8601String();
+    if (kDebugMode) {
+      print('❌ [$timestamp] DiaryService ERROR: $message');
+      print('🔴 Error: $error');
+      if (stackTrace != null) {
+        print('📍 StackTrace: $stackTrace');
+      }
+    }
+    // 웹에서도 콘솔에 출력
+    if (kIsWeb) {
+      // ignore: avoid_print
+      print('🚨 [WEB ERROR] $message | Error: $error');
+    }
+  }
+
   Future<DiaryEntry> createDiary({
     required DateTime date,
     required String title,
     required String originalContent,
   }) async {
-    final user = _supabase.auth.currentUser;
-    if (user == null) throw Exception('사용자가 로그인되어 있지 않습니다.');
-
-    final now = DateTime.now();
-    final diaryData = {
-      'user_id': user.id,
-      'date': date.toIso8601String().split('T')[0],
+    _log('createDiary 시작', {
+      'date': date.toIso8601String(),
       'title': title,
-      'original_content': originalContent,
-      'created_at': now.toIso8601String(),
-      'updated_at': now.toIso8601String(),
-    };
+      'contentLength': originalContent.length,
+    });
 
-    final response = await _supabase
-        .from('diary_entries')
-        .insert(diaryData)
-        .select()
-        .single();
+    try {
+      final user = _supabase.auth.currentUser;
+      _log('현재 사용자', {
+        'userId': user?.id,
+        'isAnonymous': user?.appMetadata['provider'] == 'anonymous',
+      });
 
-    return DiaryEntry.fromJson(response);
+      if (user == null) {
+        _logError('사용자 없음', '로그인되지 않은 상태');
+        throw Exception('사용자가 로그인되어 있지 않습니다.');
+      }
+
+      final now = DateTime.now();
+      final diaryData = {
+        'user_id': user.id,
+        'date': date.toIso8601String().split('T')[0],
+        'title': title,
+        'original_content': originalContent,
+        'created_at': now.toIso8601String(),
+        'updated_at': now.toIso8601String(),
+      };
+
+      _log('데이터베이스에 저장 시도', diaryData);
+
+      final response = await _supabase
+          .from('diary_entries')
+          .insert(diaryData)
+          .select()
+          .single();
+
+      _log('저장 성공!', response);
+      return DiaryEntry.fromJson(response);
+    } catch (e, stackTrace) {
+      _logError('createDiary 실패', e, stackTrace);
+      rethrow;
+    }
   }
 
   Future<DiaryEntry> updateDiaryWithGenerated({
@@ -82,8 +137,14 @@ class DiaryService {
     required String title,
     required String originalContent,
   }) async {
+    _log('generateDiaryWithAI 시작', {
+      'title': title,
+      'contentLength': originalContent.length,
+    });
+
     try {
-      // Supabase Edge Function 호출
+      _log('Edge Function 호출 시도');
+      
       final response = await _supabase.functions.invoke(
         'generate-diary',
         body: {
@@ -92,19 +153,23 @@ class DiaryService {
         },
       );
 
+      _log('Edge Function 응답', response.data);
+
       if (response.data != null && response.data['generated_content'] != null) {
+        _log('AI 생성 성공');
         return response.data['generated_content'];
       } else {
         throw Exception('AI 일기 생성 실패');
       }
     } catch (e) {
-      // Edge Function이 아직 배포되지 않은 경우 임시 응답
+      _log('Edge Function 실패, Mock 데이터 사용', e.toString());
       await Future.delayed(const Duration(seconds: 2));
       return _generateMockDiary(title, originalContent);
     }
   }
 
   String _generateMockDiary(String title, String originalContent) {
+    _log('Mock 일기 생성');
     return """오늘은 정말 특별한 하루였다. $title
 
 $originalContent

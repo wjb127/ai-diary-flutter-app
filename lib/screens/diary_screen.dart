@@ -11,21 +11,56 @@ class DiaryScreen extends StatefulWidget {
   State<DiaryScreen> createState() => _DiaryScreenState();
 }
 
-class _DiaryScreenState extends State<DiaryScreen> {
+class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStateMixin {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final DiaryService _diaryService = DiaryService();
+  
   bool _isLoading = false;
   String? _generatedDiary;
   DiaryEntry? _existingDiary;
+  bool _isCalendarExpanded = false;
+  
+  late AnimationController _animationController;
+  late Animation<double> _expandAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    
+    // 앱 진입 시 오늘 날짜 일기 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDiaryForDate(_selectedDay);
+    });
+  }
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _animationController.dispose();
     super.dispose();
+  }
+
+  void _toggleCalendar() {
+    setState(() {
+      _isCalendarExpanded = !_isCalendarExpanded;
+      if (_isCalendarExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
   }
 
   @override
@@ -48,84 +83,111 @@ class _DiaryScreenState extends State<DiaryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 달력 섹션
+              // 날짜 선택 섹션 (접고 펼칠 수 있음)
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '날짜 선택',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+                child: Column(
+                  children: [
+                    // 날짜 표시 및 토글 버튼
+                    InkWell(
+                      onTap: _toggleCalendar,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '날짜 선택',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(_selectedDay),
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF6366F1).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: AnimatedRotation(
+                                turns: _isCalendarExpanded ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 300),
+                                child: const Icon(
+                                  Icons.expand_more,
+                                  color: Color(0xFF6366F1),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      TableCalendar<String>(
-                        firstDay: DateTime.utc(2020, 1, 1),
-                        lastDay: DateTime.utc(2030, 12, 31),
-                        focusedDay: _focusedDay,
-                        calendarFormat: CalendarFormat.month,
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                        onDaySelected: (selectedDay, focusedDay) {
-                          setState(() {
-                            _selectedDay = selectedDay;
-                            _focusedDay = focusedDay;
-                          });
-                          _loadDiaryForDate(selectedDay);
-                        },
-                        calendarStyle: const CalendarStyle(
-                          outsideDaysVisible: false,
-                          selectedDecoration: BoxDecoration(
-                            color: Color(0xFF6366F1),
-                            shape: BoxShape.circle,
+                    ),
+                    
+                    // 달력 (애니메이션으로 접고 펼침)
+                    SizeTransition(
+                      sizeFactor: _expandAnimation,
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: TableCalendar<String>(
+                          firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: _focusedDay,
+                          calendarFormat: CalendarFormat.month,
+                          startingDayOfWeek: StartingDayOfWeek.monday,
+                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDay = selectedDay;
+                              _focusedDay = focusedDay;
+                              _isCalendarExpanded = false;
+                            });
+                            _animationController.reverse();
+                            _loadDiaryForDate(selectedDay);
+                          },
+                          calendarStyle: const CalendarStyle(
+                            outsideDaysVisible: false,
+                            selectedDecoration: BoxDecoration(
+                              color: Color(0xFF6366F1),
+                              shape: BoxShape.circle,
+                            ),
+                            todayDecoration: BoxDecoration(
+                              color: Color(0xFF10B981),
+                              shape: BoxShape.circle,
+                            ),
+                            markerDecoration: BoxDecoration(
+                              color: Color(0xFFF59E0B),
+                              shape: BoxShape.circle,
+                            ),
+                            weekendTextStyle: TextStyle(color: Color(0xFFEF4444)),
                           ),
-                          todayDecoration: BoxDecoration(
-                            color: Color(0xFF10B981),
-                            shape: BoxShape.circle,
-                          ),
-                          markerDecoration: BoxDecoration(
-                            color: Color(0xFFF59E0B),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        headerStyle: const HeaderStyle(
-                          titleCentered: true,
-                          formatButtonVisible: false,
-                          titleTextStyle: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
+                          headerStyle: const HeaderStyle(
+                            titleCentered: true,
+                            formatButtonVisible: false,
+                            titleTextStyle: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E293B),
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // 선택된 날짜 표시
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(_selectedDay)} 일기',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6366F1),
-                  ),
-                  textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
               
@@ -138,15 +200,42 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '오늘의 일기 ✍️',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.edit,
+                            color: Color(0xFF6366F1),
+                            size: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '오늘의 일기',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          const Spacer(),
+                          if (_existingDiary != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text(
+                                '저장됨',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF10B981),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
                       
                       // 제목 입력
                       TextField(
@@ -288,10 +377,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1).withValues(alpha: 0.05),
+                            color: const Color(0xFF6366F1).withOpacity(0.05),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                              color: const Color(0xFF6366F1).withOpacity(0.2),
                             ),
                           ),
                           child: Text(
@@ -337,15 +426,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // 앱 진입 시 오늘 날짜 일기 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadDiaryForDate(_selectedDay);
-    });
   }
 
   Future<void> _loadDiaryForDate(DateTime date) async {

@@ -1,0 +1,23 @@
+-- ✅ 이미 실행 완료된 쿼리 (다시 실행하지 마세요!)
+-- 이 파일은 기록용입니다
+
+/*
+이미 실행하신 내용:
+- pgcrypto extension 설치 ✅
+- diary_entries 테이블 생성 ✅  
+- RLS 활성화 ✅
+- 유니크 인덱스 생성 ✅
+- updated_at 트리거 생성 ✅
+- RLS 정책 4개 생성 ✅
+*/
+
+-- 아래는 이미 실행된 쿼리입니다 (참고용)
+-- create extension if not exists pgcrypto;
+-- create table diary_entries...
+-- alter table diary_entries enable row level security;
+-- create unique index diary_entries_user_date_idx...
+-- create trigger update_diary_entries_updated_at...
+-- create policy "select_own"...
+-- create policy "insert_own"...
+-- create policy "update_own"...
+-- create policy "delete_own"...
