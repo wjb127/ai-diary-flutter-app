@@ -1,14 +1,8 @@
 {
-  "buildCommand": false,
-  "outputDirectory": "build/web",
-  "framework": null,
-  "routes": [
+  "rewrites": [
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
