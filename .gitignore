@@ -12,6 +12,18 @@
 .swiftpm/
 migrate_working_dir/
 
+# Security - API Keys and sensitive config files
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/config/api_keys.dart
+.env
+.env.*
+*.key
+*.p8
+*.p12
+*.jks
+*.keystore
+
 # IntelliJ related
 *.iml
 *.ipr

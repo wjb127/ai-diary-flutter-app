@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../services/diary_service.dart';
+import '../services/subscription_service.dart';
 import '../models/diary_model.dart';
+import '../screens/subscription_screen.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -17,6 +19,7 @@ class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStat
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final DiaryService _diaryService = DiaryService();
+  final SubscriptionService _subscriptionService = SubscriptionService();
   
   bool _isLoading = false;
   String? _generatedDiary;
@@ -38,10 +41,15 @@ class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStat
       curve: Curves.easeInOut,
     );
     
-    // 앱 진입 시 오늘 날짜 일기 로드
+    // 앱 진입 시 초기화
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadDiaryForDate(_selectedDay);
+      _initializeServices();
     });
+  }
+
+  Future<void> _initializeServices() async {
+    await _subscriptionService.initialize();
+    await _loadDiaryForDate(_selectedDay);
   }
 
   @override
@@ -466,6 +474,13 @@ class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStat
       return;
     }
 
+    // 프리미엄 제한 확인
+    final canCreate = await _subscriptionService.canCreateDiary();
+    if (!canCreate) {
+      await _showUpgradeDialog();
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -538,5 +553,60 @@ class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStat
         ),
       );
     }
+  }
+
+  Future<void> _showUpgradeDialog() async {
+    final remaining = await _subscriptionService.getRemainingDiaries();
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          '일기 작성 제한',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('이번 달 무료 일기 작성 횟수를 모두 사용했습니다.'),
+            const SizedBox(height: 8),
+            Text(
+              '남은 횟수: $remaining/${SubscriptionService.freeMonthlyDiaryLimit}',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+            const Text('프리미엄으로 업그레이드하고 무제한 일기를 작성하세요! 🌟'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('나중에'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final result = await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SubscriptionScreen(),
+                ),
+              );
+              
+              if (result == true) {
+                await _subscriptionService.refreshCustomerInfo();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+            ),
+            child: const Text(
+              '프리미엄 구독',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

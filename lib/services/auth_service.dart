@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthService {
@@ -73,37 +72,19 @@ class AuthService {
     }
   }
 
-  // 구글 로그인
+  // 구글 로그인 (Supabase OAuth)
   Future<void> signInWithGoogle() async {
-    _log('구글 로그인 시도');
+    _log('구글 로그인 시도 (Supabase OAuth)');
     
     try {
-      const webClientId = '949519878688-h2ag7kbhsj18bhcjf5k2p61e4ggkdgls.apps.googleusercontent.com';
-      const iosClientId = '949519878688-9n5jvlprvjgbdju2e1qngdph21u9a6g8.apps.googleusercontent.com';
-
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: iosClientId,
-        serverClientId: webClientId,
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb 
+            ? null 
+            : 'com.aidiary.app://login-callback/',
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
-
-      final googleUser = await googleSignIn.signIn();
-      final googleAuth = await googleUser!.authentication;
-      final accessToken = googleAuth.accessToken;
-      final idToken = googleAuth.idToken;
-
-      if (accessToken == null) {
-        throw Exception('구글 액세스 토큰을 가져올 수 없습니다');
-      }
-      if (idToken == null) {
-        throw Exception('구글 ID 토큰을 가져올 수 없습니다');
-      }
-
-      await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
+      
       _log('구글 로그인 성공');
     } catch (e) {
       _log('구글 로그인 실패', e.toString());
