@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../services/subscription_service.dart';
+import '../services/auth_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -10,7 +11,7 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
-  final SubscriptionService _subscriptionService = SubscriptionService();
+  final SubscriptionService _subscriptionService = SubscriptionService(AuthService());
   List<StoreProduct> _products = [];
   bool _isLoading = true;
   int _selectedIndex = 1; // 기본적으로 연간 플랜 선택

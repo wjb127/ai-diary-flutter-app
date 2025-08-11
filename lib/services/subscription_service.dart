@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_service.dart';
 
 class SubscriptionService {
   static const String _revenueCatApiKey = String.fromEnvironment('REVENUECAT_API_KEY');
@@ -12,13 +13,15 @@ class SubscriptionService {
   
   CustomerInfo? _customerInfo;
   bool _isInitialized = false;
+  final AuthService _authService;
+  
+  SubscriptionService(this._authService);
   
   bool get isPremium => _customerInfo?.entitlements.all[_entitlementId]?.isActive ?? false;
   
   void _log(String message, [dynamic data]) {
-    if (kIsWeb) {
-      print('💳 [SUBSCRIPTION] $message ${data != null ? '| $data' : ''}');
-    }
+    // 모든 플랫폼에서 로그 출력 (디버깅용)
+    debugPrint('💳 [SUBSCRIPTION] $message ${data != null ? '| $data' : ''}');
   }
   
   Future<void> initialize() async {
@@ -42,11 +45,13 @@ class SubscriptionService {
       
       await Purchases.configure(configuration);
       
-      // 사용자 ID 설정 (Supabase Auth ID 사용)
-      final user = Supabase.instance.client.auth.currentUser;
+      // 사용자 ID 설정 (AuthService를 통해 현재 사용자 정보 가져오기)
+      final user = _authService.currentUser;
       if (user != null) {
         await Purchases.logIn(user.id);
-        _log('사용자 로그인', user.id);
+        _log('사용자 로그인', '${user.id} (${user.email})');
+      } else {
+        _log('익명 사용자로 초기화');
       }
       
       // 구독 정보 가져오기

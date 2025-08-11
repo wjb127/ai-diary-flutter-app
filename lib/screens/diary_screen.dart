@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../services/diary_service.dart';
 import '../services/subscription_service.dart';
+import '../services/auth_service.dart';
 import '../models/diary_model.dart';
 import '../screens/subscription_screen.dart';
 
@@ -19,7 +20,7 @@ class _DiaryScreenState extends State<DiaryScreen> with SingleTickerProviderStat
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final DiaryService _diaryService = DiaryService();
-  final SubscriptionService _subscriptionService = SubscriptionService();
+  final SubscriptionService _subscriptionService = SubscriptionService(AuthService());
   
   bool _isLoading = false;
   String? _generatedDiary;

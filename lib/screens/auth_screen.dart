@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
+import '../screens/home_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -59,13 +60,44 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       );
       
       if (mounted) {
-        context.go('/');
+        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('로그인 실패: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGuestLogin() async {
+    debugPrint('🟢 [AUTH_SCREEN] 게스트 로그인 시작');
+    
+    setState(() => _isLoading = true);
+
+    try {
+      debugPrint('🟢 [AUTH_SCREEN] AuthService.signInAsGuest 호출');
+      await _authService.signInAsGuest();
+      
+      debugPrint('🟢 [AUTH_SCREEN] 게스트 로그인 성공, HomeScreen으로 이동');
+      if (mounted) {
+        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
+        debugPrint('🟢 [AUTH_SCREEN] 프로필 화면으로 돌아가기 완료');
+      }
+    } catch (e) {
+      debugPrint('🔴 [AUTH_SCREEN] 게스트 로그인 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('게스트 로그인 실패: ${e.toString().replaceAll('Exception: ', '')}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -270,8 +302,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget _buildLoginForm() {
     return Form(
       key: _loginFormKey,
-      child: Column(
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
           TextFormField(
             controller: _loginEmailController,
             keyboardType: TextInputType.emailAddress,
@@ -486,7 +519,41 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
+          
+          const SizedBox(height: 16),
+          
+          // 게스트 모드 버튼
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: _isLoading ? null : _handleGuestLogin,
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFF10B981)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                backgroundColor: Colors.white,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.person_outline, color: Color(0xFF10B981)),
+                  const SizedBox(width: 8),
+                  Text(
+                    _isLoading ? '로그인 중...' : '게스트로 시작하기',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
+        ),
       ),
     );
   }

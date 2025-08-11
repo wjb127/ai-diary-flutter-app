@@ -50,22 +50,11 @@ void main() async {
   );
 }
 
+final _authService = AuthService();
+
 final _router = GoRouter(
-  initialLocation: '/auth',
-  redirect: (context, state) {
-    final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
-    final isAuthRoute = state.matchedLocation == '/auth';
-    
-    if (!isLoggedIn && !isAuthRoute) {
-      return '/auth';
-    }
-    
-    if (isLoggedIn && isAuthRoute) {
-      return '/';
-    }
-    
-    return null;
-  },
+  initialLocation: '/', // 바로 홈으로 이동
+  refreshListenable: _authService,
   routes: [
     GoRoute(
       path: '/auth',
@@ -102,28 +91,7 @@ final _router = GoRouter(
       ],
     ),
   ],
-  refreshListenable: GoRouterRefreshStream(
-    Supabase.instance.client.auth.onAuthStateChange,
-  ),
 );
-
-// GoRouter refresh를 위한 헬퍼 클래스
-class GoRouterRefreshStream extends ChangeNotifier {
-  GoRouterRefreshStream(Stream<AuthState> stream) {
-    notifyListeners();
-    _subscription = stream.listen((_) {
-      notifyListeners();
-    });
-  }
-
-  late final StreamSubscription<AuthState> _subscription;
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

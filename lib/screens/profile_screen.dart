@@ -1,11 +1,37 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/subscription_service.dart';
+import 'auth_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final AuthService _authService = AuthService();
+  late SubscriptionService _subscriptionService;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscriptionService = SubscriptionService(_authService);
+    _initializeSubscription();
+  }
+
+  Future<void> _initializeSubscription() async {
+    await _subscriptionService.initialize();
+    if (mounted) setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = _authService.currentUser;
+    final isGuest = user?.id == 'guest-user-id';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -29,179 +55,70 @@ class ProfileScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF6366F1),
-                      Color(0xFF8B5CF6),
-                    ],
+                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: const Icon(
-                        Icons.person,
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      child: Icon(
+                        isGuest ? Icons.person_outline : Icons.person,
                         size: 40,
                         color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      '사용자님',
-                      style: TextStyle(
-                        fontSize: 24,
+                    Text(
+                      isGuest ? '게스트 사용자' : (user?.email ?? '사용자'),
+                      style: const TextStyle(
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 8),
-                      Container(
+                    Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        '무료 플랜',
-                        style: TextStyle(
+                      child: Text(
+                        _subscriptionService.isPremium ? '프리미엄 회원' : '무료 회원',
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 30),
-              
-              // 통계 카드
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      icon: Icons.edit,
-                      title: '작성한 일기',
-                      count: '0',
-                      color: const Color(0xFF10B981),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      icon: Icons.auto_awesome,
-                      title: 'AI 각색',
-                      count: '0',
-                      color: const Color(0xFF6366F1),
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 30),
-              
-              // 메뉴 리스트
-              _buildMenuSection('계정', [
-                _buildMenuItem(
-                  icon: Icons.person_outline,
-                  title: '프로필 수정',
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  icon: Icons.notifications_outlined,
-                  title: '알림 설정',
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  icon: Icons.lock_outline,
-                  title: '개인정보 보호',
-                  onTap: () {},
-                ),
-              ]),
-              
-              const SizedBox(height: 20),
-              
-              _buildMenuSection('일기', [
-                _buildMenuItem(
-                  icon: Icons.backup_outlined,
-                  title: '일기 백업',
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  icon: Icons.download_outlined,
-                  title: '일기 내보내기',
-                  onTap: () {},
-                ),
-              ]),
-              
-              const SizedBox(height: 20),
-              
-              _buildMenuSection('지원', [
-                _buildMenuItem(
-                  icon: Icons.help_outline,
-                  title: '도움말',
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  icon: Icons.contact_support_outlined,
-                  title: '문의하기',
-                  onTap: () {},
-                ),
-                _buildMenuItem(
-                  icon: Icons.star_outline,
-                  title: '앱 평가하기',
-                  onTap: () {},
-                ),
-              ]),
-              
-              const SizedBox(height: 30),
-              
-              // 로그아웃 버튼
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () async {
-                    final auth = AuthService();
-                    try {
-                      await auth.signOut();
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('로그아웃 되었습니다.')),
-                      );
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('로그아웃 실패: $e')),
-                      );
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFEF4444),
-                    side: const BorderSide(color: Color(0xFFEF4444)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 24),
+
+              // 게스트 모드일 때만 로그인 유도
+              if (isGuest) ...[
+                _buildLoginPrompt(),
+                const SizedBox(height: 24),
+              ],
+
+              // 구독 관리
+              _buildSubscriptionSection(),
+
+              const SizedBox(height: 16),
+
+              // 계정 관리
+              _buildAccountSection(isGuest),
+
+              const SizedBox(height: 24),
+
+              // 로그아웃 버튼 (게스트가 아닐 때만)
+              if (!isGuest)
+                _buildLogoutButton(),
             ],
           ),
         ),
@@ -209,100 +126,181 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String title,
-    required String count,
-    required Color color,
-  }) {
+  Widget _buildLoginPrompt() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        color: const Color(0xFFF0F9FF),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF0EA5E9).withOpacity(0.2)),
       ),
       child: Column(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+          const Icon(
+            Icons.cloud_sync_outlined,
+            size: 40,
+            color: Color(0xFF0EA5E9),
           ),
           const SizedBox(height: 12),
-          Text(
-            count,
-            style: const TextStyle(
-              fontSize: 24,
+          const Text(
+            '로그인하여 데이터 동기화',
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1E293B),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: const TextStyle(
+          const SizedBox(height: 8),
+          const Text(
+            '계정을 만들면 모든 기기에서 일기를 동기화할 수 있습니다.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
             ),
-            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => _navigateToAuth(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0EA5E9),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                '로그인 / 회원가입',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMenuSection(String title, List<Widget> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
+  Widget _buildSubscriptionSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '구독 관리',
+            style: TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1E293B),
             ),
           ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+          const SizedBox(height: 16),
+          _buildMenuTile(
+            icon: Icons.star_outline,
+            title: '프리미엄 구독',
+            subtitle: _subscriptionService.isPremium ? '구독 중' : '무제한 일기 작성',
+            onTap: () => Navigator.pushNamed(context, '/subscription'),
           ),
-          child: Column(children: items),
-        ),
-      ],
+          _buildMenuTile(
+            icon: Icons.restore,
+            title: '구매 복원',
+            subtitle: '이전 구매 내역 복원',
+            onTap: _restorePurchases,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildAccountSection(bool isGuest) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '계정 정보',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildMenuTile(
+            icon: Icons.info_outline,
+            title: '앱 정보',
+            subtitle: 'v1.0.0',
+            onTap: () {},
+          ),
+          _buildMenuTile(
+            icon: Icons.privacy_tip_outlined,
+            title: '개인정보처리방침',
+            subtitle: '개인정보 보호 정책',
+            onTap: () {},
+          ),
+          _buildMenuTile(
+            icon: Icons.description_outlined,
+            title: '이용약관',
+            subtitle: '서비스 이용약관',
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuTile({
     required IconData icon,
     required String title,
+    required String subtitle,
     required VoidCallback onTap,
   }) {
     return ListTile(
+      contentPadding: EdgeInsets.zero,
       leading: Icon(
         icon,
-        color: const Color(0xFF64748B),
-        size: 24,
+        color: const Color(0xFF6366F1),
       ),
       title: Text(
         title,
         style: const TextStyle(
-          fontSize: 16,
+          fontWeight: FontWeight.w500,
           color: Color(0xFF1E293B),
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF64748B),
         ),
       ),
       trailing: const Icon(
@@ -310,9 +308,87 @@ class ProfileScreen extends StatelessWidget {
         color: Color(0xFF64748B),
       ),
       onTap: onTap,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: _handleLogout,
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFFEF4444)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: const Text(
+          '로그아웃',
+          style: TextStyle(
+            color: Color(0xFFEF4444),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
+  }
+
+  void _navigateToAuth() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AuthScreen()),
+    );
+  }
+
+  Future<void> _restorePurchases() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final success = await _subscriptionService.restorePurchases();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? '구매가 복원되었습니다.' : '복원할 구매 내역이 없습니다.'),
+            backgroundColor: success ? const Color(0xFF10B981) : const Color(0xFF64748B),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('복원 중 오류가 발생했습니다.'),
+            backgroundColor: Color(0xFFEF4444),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('로그아웃되었습니다.'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('로그아웃 중 오류가 발생했습니다.'),
+            backgroundColor: Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
   }
 }
