@@ -30,6 +30,13 @@ class SubscriptionService {
     try {
       _log('RevenueCat 초기화 시작');
       
+      // API 키가 없으면 초기화를 건너뜀 (개발/테스트 환경)
+      if (_revenueCatApiKey.isEmpty) {
+        _log('RevenueCat API 키가 없습니다. 구독 기능이 비활성화됩니다.');
+        _isInitialized = true;
+        return;
+      }
+      
       // RevenueCat 설정
       await Purchases.setLogLevel(LogLevel.debug);
       
