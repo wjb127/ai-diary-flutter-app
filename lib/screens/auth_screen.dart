@@ -60,7 +60,25 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       );
       
       if (mounted) {
-        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
+        // 로그인 성공 메시지 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('로그인 성공! 홈 화면으로 이동합니다.'),
+            backgroundColor: Color(0xFF10B981),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        // 짧은 딜레이 후 홈 화면으로 이동
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // AuthScreen을 닫고 메인 화면의 홈 탭으로 이동
+        Navigator.of(context).pop(); // AuthScreen 닫기
+        
+        // 홈 탭으로 이동하기 위해 GoRouter 사용
+        if (mounted) {
+          context.go('/'); // 홈 화면으로 이동
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -157,7 +175,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     try {
       await _authService.signInWithGoogle();
       if (mounted) {
-        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('구글 로그인 성공! 홈 화면으로 이동합니다.'),
+            backgroundColor: Color(0xFF10B981),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        await Future.delayed(const Duration(milliseconds: 500));
+        Navigator.of(context).pop();
+        
+        if (mounted) {
+          context.go('/');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -181,7 +212,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     try {
       await _authService.signInWithApple();
       if (mounted) {
-        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('애플 로그인 성공! 홈 화면으로 이동합니다.'),
+            backgroundColor: Color(0xFF10B981),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        
+        await Future.delayed(const Duration(milliseconds: 500));
+        Navigator.of(context).pop();
+        
+        if (mounted) {
+          context.go('/');
+        }
       }
     } catch (e) {
       if (mounted) {

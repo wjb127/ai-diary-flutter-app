@@ -265,16 +265,10 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           ),
           const SizedBox(height: 16),
           _buildLinkTile(
-            icon: Icons.code_outlined,
-            title: 'GitHub 소스코드',
-            subtitle: 'github.com/wjb127/ai-diary-flutter-app',
-            onTap: () => _launchURL('https://github.com/wjb127/ai-diary-flutter-app'),
-          ),
-          _buildLinkTile(
             icon: Icons.bug_report_outlined,
             title: '버그 신고',
             subtitle: '문제점을 신고해주세요',
-            onTap: () => _launchURL('https://github.com/wjb127/ai-diary-flutter-app/issues'),
+            onTap: () => _launchURL('mailto:wjb127@naver.com?subject=AI일기장 버그신고'),
           ),
           _buildLinkTile(
             icon: Icons.email_outlined,
