@@ -136,10 +136,12 @@ class DiaryService {
   Future<String> generateDiaryWithAI({
     required String title,
     required String originalContent,
+    String style = 'emotional',
   }) async {
     _log('generateDiaryWithAI 시작', {
       'title': title,
       'contentLength': originalContent.length,
+      'style': style,
     });
 
     try {
@@ -150,6 +152,7 @@ class DiaryService {
         body: {
           'title': title,
           'content': originalContent,
+          'style': style,
         },
       );
 
@@ -164,13 +167,55 @@ class DiaryService {
     } catch (e) {
       _log('Edge Function 실패, Mock 데이터 사용', e.toString());
       await Future.delayed(const Duration(seconds: 2));
-      return _generateMockDiary(title, originalContent);
+      return _generateMockDiary(title, originalContent, style);
     }
   }
 
-  String _generateMockDiary(String title, String originalContent) {
-    _log('Mock 일기 생성');
-    return """오늘은 정말 특별한 하루였다. $title
+  String _generateMockDiary(String title, String originalContent, String style) {
+    _log('Mock 일기 생성', style);
+    
+    // 문체별 Mock 일기 반환
+    switch (style) {
+      case 'epic':
+        return """[${DateTime.now().year}년 제${DateTime.now().month}월 제${DateTime.now().day}일의 연대기]
+
+오늘, 평범한 필멸자인 나는 "$title"라는 대업을 완수하였노라.
+
+$originalContent
+
+이날의 업적은 후세에 길이 전해질 것이며, 나의 후손들은 이 영광스러운 순간을 영원히 기억하리라. 비록 지금은 하찮아 보일지라도, 이 모든 것이 거대한 운명의 톱니바퀴를 돌리는 중요한 사건임을 누가 알겠는가?
+
+신들이여, 내일도 나에게 힘을 주소서!
+
+[연대기 기록 완료. 가문의 위신 +10, 스트레스 -5]""";
+        
+      case 'poetic':
+        return """$title
+
+$originalContent
+
+바람이 속삭이듯 하루가 지나가고
+작은 숨결들이 모여 하나의 시가 되었네
+평범함 속에 숨겨진 아름다움을 발견하며
+오늘도 나는 조용히 성장하고 있어
+
+내일은 또 어떤 시를 쓰게 될까
+기대와 설렘으로 펜을 내려놓는다""";
+        
+      case 'humorous':
+        return """제목: $title (웃겨서 배꼽 빠질 뻔한 하루)
+
+$originalContent
+
+ㅋㅋㅋㅋㅋ 진짜 오늘 내가 이런 일을 겪었다니! 
+나중에 이 일기 다시 읽으면 또 빵 터질 듯.
+인생은 시트콤이고, 나는 주인공이야! 
+내일은 또 무슨 개그 에피소드가 펼쳐질까? 🤣
+
+PS. 미래의 나야, 이거 읽고 웃지 마라. 아 참고로 복근 생겼니?""";
+        
+      default:
+        return """오늘은 정말 특별한 하루였다. $title
 
 $originalContent
 
@@ -181,6 +226,7 @@ $originalContent
 오늘의 나에게 고맙다. 내일의 나도 기대된다. ✨
 
 - AI가 당신의 일상을 아름답게 각색했습니다 -""";
+    }
   }
 
   Future<void> deleteDiary(String diaryId) async {

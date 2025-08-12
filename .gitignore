@@ -65,3 +65,13 @@ app.*.map.json
 
 # Local env files (do not commit)
 supabase/functions/.env.local
+
+# Supabase local development
+.supabase/
+
+# MCP settings with sensitive keys
+settings.json
+
+# Database and API credentials
+*.token
+*.secret

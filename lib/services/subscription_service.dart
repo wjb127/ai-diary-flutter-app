@@ -158,6 +158,8 @@ class SubscriptionService {
   }
   
   Future<bool> canCreateDiary() async {
+    // 디버그 모드에서는 생성 제한 없음
+    if (kDebugMode) return true;
     if (isPremium) return true;
     
     final remaining = await getRemainingDiaries();

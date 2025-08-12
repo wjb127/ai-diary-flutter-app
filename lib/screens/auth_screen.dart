@@ -157,7 +157,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     try {
       await _authService.signInWithGoogle();
       if (mounted) {
-        context.go('/');
+        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
       }
     } catch (e) {
       if (mounted) {
@@ -181,7 +181,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     try {
       await _authService.signInWithApple();
       if (mounted) {
-        context.go('/');
+        Navigator.of(context).pop(); // 프로필 화면으로 돌아가기
       }
     } catch (e) {
       if (mounted) {
@@ -203,6 +203,21 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          '계정 관리',
+          style: TextStyle(
+            color: Color(0xFF1E293B),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: Container(

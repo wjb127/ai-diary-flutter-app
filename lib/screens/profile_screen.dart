@@ -371,10 +371,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _handleLogout() async {
     try {
       await _authService.signOut();
+      // 로그아웃 후 게스트 모드로 전환
+      await _authService.signInAsGuest();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('로그아웃되었습니다.'),
+            content: Text('로그아웃되었습니다. 게스트 모드로 전환됩니다.'),
             backgroundColor: Color(0xFF10B981),
           ),
         );

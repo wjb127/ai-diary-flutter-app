@@ -10,7 +10,9 @@ import 'screens/home_screen.dart';
 import 'screens/diary_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/admin/admin_dashboard_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
 import 'widgets/responsive_wrapper.dart';
@@ -40,7 +42,8 @@ void main() async {
     debugPrint('Supabase 초기화 실패: $e');
   }
   
-  // 익명 로그인 제거 - 실제 로그인/회원가입만 사용
+  // 게스트 모드로 자동 시작
+  _authService.signInAsGuest();
   
   runApp(
     ChangeNotifierProvider(
@@ -53,9 +56,14 @@ void main() async {
 final _authService = AuthService();
 
 final _router = GoRouter(
-  initialLocation: '/', // 바로 홈으로 이동
+  initialLocation: '/',  // 바로 홈으로 시작
   refreshListenable: _authService,
   routes: [
+    GoRoute(
+      path: '/splash',
+      name: 'splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
     GoRoute(
       path: '/auth',
       name: 'auth',
@@ -89,6 +97,11 @@ final _router = GoRouter(
           builder: (context, state) => const SubscriptionScreen(),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/admin',
+      name: 'admin',
+      builder: (context, state) => const AdminDashboardScreen(),
     ),
   ],
 );

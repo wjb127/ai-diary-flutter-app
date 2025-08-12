@@ -5,7 +5,7 @@ Flutter와 Supabase, Claude AI를 활용한 스마트 일기 앱입니다. 사�
 ## 🌟 주요 기능
 
 - **📅 날짜별 일기 작성**: 직관적인 달력 인터페이스로 원하는 날짜의 일기를 작성
-- **🤖 AI 각색**: Claude AI가 사용자의 일상을 따뜻하고 아름다운 문체로 재구성
+- **🤖 AI 각색**: Claude AI가 10가지 문체로 일기를 각색 (대서사시, 유머, 시적, 철학적 등)
 - **💾 자동 저장**: Supabase 클라우드 데이터베이스에 안전하게 저장
 - **📱 아름다운 UI**: 모던하고 직관적인 사용자 인터페이스
 - **🔐 보안**: Row Level Security(RLS)로 개인 정보 보호
@@ -44,12 +44,20 @@ flutter pub get
 ### 3. Supabase 설정
 
 1. [Supabase](https://supabase.com)에서 새 프로젝트 생성
-2. `SUPABASE_SETUP.md` 파일의 가이드를 따라 데이터베이스와 Edge Functions 설정
-3. 환경 변수 설정:
+2. `.env.example`을 복사하여 `.env` 파일을 생성하고 Supabase 정보 입력
+3. Supabase Edge Functions 배포:
 
 ```bash
-flutter run --dart-define=SUPABASE_URL=your_supabase_url \
-           --dart-define=SUPABASE_ANON_KEY=your_anon_key
+supabase login
+supabase functions deploy generate-diary --project-ref your_project_ref
+```
+
+4. 환경 변수와 함께 실행:
+
+```bash
+flutter run -d web-server --web-port=8080 \
+  --dart-define=SUPABASE_URL=your_supabase_url \
+  --dart-define=SUPABASE_ANON_KEY=your_anon_key
 ```
 
 ### 4. 실행

@@ -5,6 +5,14 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class AuthService extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
   bool _isGuestMode = true; // 기본적으로 게스트 모드
+  
+  AuthService() {
+    // 인증 상태 변경 감지
+    _supabase.auth.onAuthStateChange.listen((data) {
+      _log('인증 상태 변경', '${data.event} - ${data.session?.user?.email}');
+      notifyListeners();
+    });
+  }
 
   void _log(String message, [dynamic data]) {
     // 모든 플랫폼에서 로그 출력 (디버깅용)
@@ -12,11 +20,20 @@ class AuthService extends ChangeNotifier {
   }
 
   User? get currentUser {
+    final supabaseUser = _supabase.auth.currentUser;
+    
+    // Supabase에 실제 사용자가 로그인되어 있으면 그 사용자를 반환
+    if (supabaseUser != null && !supabaseUser.isAnonymous) {
+      _isGuestMode = false; // 실제 사용자가 있으면 게스트 모드 해제
+      return supabaseUser;
+    }
+    
+    // 게스트 모드이거나 익명 사용자인 경우
     if (_isGuestMode) {
-      // 게스트 모드용 더미 User 객체 반환
       return _createGuestUser();
     }
-    return _supabase.auth.currentUser;
+    
+    return supabaseUser;
   }
 
   User _createGuestUser() {
