@@ -90,6 +90,74 @@ class AppLocalizations {
   String get diarySaved => languageCode == 'ko' ? '일기가 성공적으로 저장되었습니다! 🎉' : 'Diary saved successfully! 🎉';
   String get diarySaveFailed => languageCode == 'ko' ? '일기 저장 실패' : 'Failed to save diary';
   
+  // 프로필 화면
+  String get profile => languageCode == 'ko' ? '프로필' : 'Profile';
+  String get guestUser => languageCode == 'ko' ? '게스트 사용자' : 'Guest User';
+  String get user => languageCode == 'ko' ? '사용자' : 'User';
+  String get premiumMember => languageCode == 'ko' ? '프리미엄 회원' : 'Premium Member';
+  String get freeMember => languageCode == 'ko' ? '무료 회원' : 'Free Member';
+  String get loginForSync => languageCode == 'ko' ? '로그인하여 데이터 동기화' : 'Login to sync data';
+  String get loginSyncDesc => languageCode == 'ko' 
+      ? '계정을 만들면 모든 기기에서 일기를 동기화할 수 있습니다.' 
+      : 'Create an account to sync your diary across all devices.';
+  String get loginSignup => languageCode == 'ko' ? '로그인 / 회원가입' : 'Login / Sign Up';
+  String get subscriptionManagement => languageCode == 'ko' ? '구독 관리' : 'Subscription Management';
+  String get premiumSubscription => languageCode == 'ko' ? '프리미엄 구독' : 'Premium Subscription';
+  String get subscribing => languageCode == 'ko' ? '구독 중' : 'Subscribed';
+  String get unlimitedDiary => languageCode == 'ko' ? '무제한 일기 작성' : 'Unlimited diary writing';
+  String get restorePurchases => languageCode == 'ko' ? '구매 복원' : 'Restore Purchases';
+  String get restorePurchasesDesc => languageCode == 'ko' ? '이전 구매 내역 복원' : 'Restore previous purchases';
+  String get accountInfo => languageCode == 'ko' ? '계정 정보' : 'Account Info';
+  String get appInfo => languageCode == 'ko' ? '앱 정보' : 'App Info';
+  String get privacyPolicy => languageCode == 'ko' ? '개인정보처리방침' : 'Privacy Policy';
+  String get privacyPolicyDesc => languageCode == 'ko' ? '개인정보 보호 정책' : 'Privacy protection policy';
+  String get termsOfService => languageCode == 'ko' ? '이용약관' : 'Terms of Service';
+  String get termsOfServiceDesc => languageCode == 'ko' ? '서비스 이용약관' : 'Service terms of use';
+  String get logout => languageCode == 'ko' ? '로그아웃' : 'Logout';
+  String get logoutDesc => languageCode == 'ko' ? '로그아웃되었습니다. 게스트 모드로 전환됩니다.' : 'Logged out. Switching to guest mode.';
+  String get logoutError => languageCode == 'ko' ? '로그아웃 중 오류가 발생했습니다.' : 'An error occurred during logout.';
+  
+  // 인증 화면
+  String get welcomeBack => languageCode == 'ko' ? '다시 오신 것을 환영해요! 👋' : 'Welcome back! 👋';
+  String get authSubtitle => languageCode == 'ko' 
+      ? 'AI 일기장에서 당신만의 특별한 추억을 만들어보세요' 
+      : 'Create your special memories with AI Diary';
+  String get emailLogin => languageCode == 'ko' ? '이메일로 로그인' : 'Login with Email';
+  String get email => languageCode == 'ko' ? '이메일' : 'Email';
+  String get emailHint => languageCode == 'ko' ? '이메일을 입력해주세요' : 'Enter your email';
+  String get password => languageCode == 'ko' ? '비밀번호' : 'Password';
+  String get passwordHint => languageCode == 'ko' ? '비밀번호를 입력해주세요' : 'Enter your password';
+  String get login => languageCode == 'ko' ? '로그인' : 'Login';
+  String get signup => languageCode == 'ko' ? '회원가입' : 'Sign Up';
+  String get signupPrompt => languageCode == 'ko' ? '계정이 없으신가요?' : 'Don\'t have an account?';
+  String get loginPrompt => languageCode == 'ko' ? '이미 계정이 있으신가요?' : 'Already have an account?';
+  String get orContinueWith => languageCode == 'ko' ? '또는 다음으로 계속하기' : 'Or continue with';
+  String get continueWithGoogle => languageCode == 'ko' ? 'Google로 계속하기' : 'Continue with Google';
+  String get continueWithApple => languageCode == 'ko' ? 'Apple로 계속하기' : 'Continue with Apple';
+  String get skipForNow => languageCode == 'ko' ? '지금은 건너뛰기' : 'Skip for now';
+  String get skipDesc => languageCode == 'ko' ? '게스트 모드로 계속 이용하기' : 'Continue in guest mode';
+  
+  // 에러 메시지
+  String get emailRequired => languageCode == 'ko' ? '이메일을 입력해주세요' : 'Please enter email';
+  String get passwordRequired => languageCode == 'ko' ? '비밀번호를 입력해주세요' : 'Please enter password';
+  String get passwordLength => languageCode == 'ko' ? '비밀번호는 6자 이상이어야 합니다' : 'Password must be at least 6 characters';
+  String get authError => languageCode == 'ko' ? '인증 오류' : 'Authentication Error';
+  String get loginSuccess => languageCode == 'ko' ? '로그인되었습니다! 🎉' : 'Logged in successfully! 🎉';
+  String get signupSuccess => languageCode == 'ko' ? '회원가입이 완료되었습니다! 🎉' : 'Sign up completed! 🎉';
+  
+  // AI 관련
+  String get styleOptions => languageCode == 'ko' ? '문체 선택' : 'Writing Style';
+  String get emotionalStyle => languageCode == 'ko' ? '🌸 감성적 문체' : '🌸 Emotional Style';
+  String get epicStyle => languageCode == 'ko' ? '⚔️ 대서사시 문체' : '⚔️ Epic Style';
+  String get poeticStyle => languageCode == 'ko' ? '📜 시적 문체' : '📜 Poetic Style';
+  String get humorousStyle => languageCode == 'ko' ? '😄 유머러스한 문체' : '😄 Humorous Style';
+  String get philosophicalStyle => languageCode == 'ko' ? '🤔 철학적 문체' : '🤔 Philosophical Style';
+  String get minimalistStyle => languageCode == 'ko' ? '⬜ 미니멀리스트' : '⬜ Minimalist';
+  String get detectiveStyle => languageCode == 'ko' ? '🔍 탐정 소설 스타일' : '🔍 Detective Style';
+  String get fairytaleStyle => languageCode == 'ko' ? '🧚 동화 스타일' : '🧚 Fairy Tale Style';
+  String get scifiStyle => languageCode == 'ko' ? '🚀 SF 소설 스타일' : '🚀 Sci-Fi Style';
+  String get historicalStyle => languageCode == 'ko' ? '📚 역사 기록 스타일' : '📚 Historical Style';
+
   // 날짜 형식
   String diaryDateFormat(DateTime date) {
     if (languageCode == 'ko') {
@@ -98,6 +166,16 @@ class AppLocalizations {
       final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return '${months[date.month - 1]} ${date.day}, ${date.year} Diary';
+    }
+  }
+  
+  String formatSelectedDate(DateTime date) {
+    if (languageCode == 'ko') {
+      return '${date.year}년 ${date.month.toString().padLeft(2, '0')}월 ${date.day.toString().padLeft(2, '0')}일';
+    } else {
+      final months = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
+      return '${months[date.month - 1]} ${date.day}, ${date.year}';
     }
   }
 }

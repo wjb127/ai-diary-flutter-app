@@ -137,11 +137,13 @@ class DiaryService {
     required String title,
     required String originalContent,
     String style = 'emotional',
+    String language = 'ko',
   }) async {
     _log('generateDiaryWithAI 시작', {
       'title': title,
       'contentLength': originalContent.length,
       'style': style,
+      'language': language,
     });
 
     try {
@@ -153,6 +155,7 @@ class DiaryService {
           'title': title,
           'content': originalContent,
           'style': style,
+          'language': language,
         },
       );
 
@@ -167,14 +170,18 @@ class DiaryService {
     } catch (e) {
       _log('Edge Function 실패, Mock 데이터 사용', e.toString());
       await Future.delayed(const Duration(seconds: 2));
-      return _generateMockDiary(title, originalContent, style);
+      return _generateMockDiary(title, originalContent, style, language);
     }
   }
 
-  String _generateMockDiary(String title, String originalContent, String style) {
-    _log('Mock 일기 생성', style);
+  String _generateMockDiary(String title, String originalContent, String style, String language) {
+    _log('Mock 일기 생성', {'style': style, 'language': language});
     
-    // 문체별 Mock 일기 반환
+    if (language == 'en') {
+      return _generateEnglishDiary(title, originalContent, style);
+    }
+    
+    // 문체별 Mock 일기 반환 (한국어)
     switch (style) {
       case 'epic':
         return """[${DateTime.now().year}년 제${DateTime.now().month}월 제${DateTime.now().day}일의 연대기]
@@ -226,6 +233,89 @@ $originalContent
 오늘의 나에게 고맙다. 내일의 나도 기대된다. ✨
 
 - AI가 당신의 일상을 아름답게 각색했습니다 -""";
+    }
+  }
+
+  String _generateEnglishDiary(String title, String originalContent, String style) {
+    switch (style) {
+      case 'epic':
+        return """[Chronicles of ${DateTime.now().year}, Month ${DateTime.now().month}, Day ${DateTime.now().day}]
+
+Today, I, a mere mortal, have accomplished the great deed known as "$title".
+
+$originalContent
+
+This day's achievements shall be passed down through generations, and my descendants will remember this glorious moment forever. Though it may seem insignificant now, who knows that all of this is an important event that turns the great wheel of destiny?
+
+Gods, give me strength tomorrow as well!
+
+[Chronicle recording complete. Family prestige +10, Stress -5]""";
+
+      case 'poetic':
+        return """$title
+
+$originalContent
+
+Like a whisper of wind, the day passes by
+Small breaths gather to become a single poem
+Discovering beauty hidden in the ordinary
+Today, I am quietly growing again
+
+What poem will I write tomorrow?
+I lay down my pen with anticipation and excitement""";
+
+      case 'humorous':
+        return """Title: $title (A Day So Funny I Almost Lost My Belly Button)
+
+$originalContent
+
+LOL, I can't believe I went through this today! 
+I'll probably burst out laughing when I read this diary later.
+Life is a sitcom, and I'm the main character! 
+What kind of comedy episode will unfold tomorrow? 🤣
+
+PS. Future me, don't laugh while reading this. Oh, by the way, do you have abs now?""";
+
+      case 'philosophical':
+        return """$title
+
+$originalContent
+
+What is existence but a series of moments strung together like pearls on the thread of consciousness? Today's experience adds another pearl to this eternal necklace of being.
+
+In the grand tapestry of life, each thread - no matter how small - contributes to the overall pattern. The mundane becomes profound when viewed through the lens of eternity.
+
+As I reflect on today's events, I'm reminded that we are both the observer and the observed, the writer and the written, constantly creating and recreating ourselves through each moment of awareness.
+
+Tomorrow brings new opportunities for philosophical inquiry and self-discovery.""";
+
+      case 'detective':
+        return """Case File: $title
+Date: ${DateTime.now().toIso8601String().split('T')[0]}
+Status: Under Investigation
+
+$originalContent
+
+Initial observations suggest there's more to this case than meets the eye. Every detail, no matter how trivial, could be a crucial clue in understanding the bigger picture of my life.
+
+The evidence points to a day filled with both mysteries and revelations. Further investigation required.
+
+Case to be continued...
+
+- Detective Me""";
+
+      default:
+        return """Today was truly a special day. $title
+
+$originalContent
+
+These small everyday moments come together to form my own precious story. I felt once again that every single day is filled with new discoveries and small joys.
+
+Even what seems like an ordinary day contains countless emotions and experiences. Sometimes it's difficult and exhausting, but even those moments become precious foundation stones that help me grow.
+
+Thank you to today's me. I'm excited about tomorrow's me too. ✨
+
+- AI has beautifully enhanced your daily life -""";
     }
   }
 

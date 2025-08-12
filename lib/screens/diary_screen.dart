@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../services/diary_service.dart';
+import '../services/localization_service.dart';
 import '../models/diary_model.dart';
 
 class DiaryScreen extends StatefulWidget {
@@ -24,18 +26,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
   
   // 문체 선택 관련
   String _selectedStyle = 'emotional'; // 기본값: 감성적
-  final Map<String, String> _styleOptions = {
-    'emotional': '🌸 감성적 문체',
-    'epic': '⚔️ 대서사시 문체',
-    'poetic': '📜 시적 문체',
-    'humorous': '😄 유머러스한 문체',
-    'philosophical': '🤔 철학적 문체',
-    'minimalist': '⬜ 미니멀리스트',
-    'detective': '🔍 탐정 소설 스타일',
-    'fairytale': '🧚 동화 스타일',
-    'scifi': '🚀 SF 소설 스타일',
-    'historical': '📚 역사 기록 스타일',
-  };
+  
+  Map<String, String> _getStyleOptions(AppLocalizations localizations) {
+    return {
+      'emotional': localizations.emotionalStyle,
+      'epic': localizations.epicStyle,
+      'poetic': localizations.poeticStyle,
+      'humorous': localizations.humorousStyle,
+      'philosophical': localizations.philosophicalStyle,
+      'minimalist': localizations.minimalistStyle,
+      'detective': localizations.detectiveStyle,
+      'fairytale': localizations.fairytaleStyle,
+      'scifi': localizations.scifiStyle,
+      'historical': localizations.historicalStyle,
+    };
+  }
 
   @override
   void dispose() {
@@ -46,24 +51,74 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'AI 일기장',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+    return Consumer<LocalizationService>(
+      builder: (context, localizationService, child) {
+        final localizations = AppLocalizations(localizationService.currentLanguage);
+        final styleOptions = _getStyleOptions(localizations);
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              localizations.navDiary,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              // 언어 전환 버튼 추가
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => localizationService.toggleLanguage(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            localizationService.isKorean ? '🇰🇷' : '🇺🇸',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            localizationService.isKorean ? 'KOR' : 'ENG',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6366F1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // 날짜 선택 섹션
               Card(
                 child: Padding(
@@ -119,7 +174,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                     const SizedBox(width: 6),
                                     Flexible(
                                       child: Text(
-                                        DateFormat('yyyy년 MM월 dd일').format(_selectedDay),
+                                        localizations.formatSelectedDate(_selectedDay),
                                         style: const TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -214,9 +269,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '오늘의 일기 ✍️',
-                        style: TextStyle(
+                      Text(
+                        localizations.diaryTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF1E293B),
@@ -228,8 +283,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       TextField(
                         controller: _titleController,
                         decoration: InputDecoration(
-                          labelText: '일기 제목',
-                          hintText: '오늘의 제목을 입력해주세요',
+                          labelText: localizations.titleLabel,
+                          hintText: localizations.titleHint,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -254,8 +309,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         controller: _contentController,
                         maxLines: 8,
                         decoration: InputDecoration(
-                          labelText: '오늘 있었던 일',
-                          hintText: '오늘 하루는 어떠셨나요? 자유롭게 적어보세요!\n완벽하지 않아도 괜찮아요 😊',
+                          labelText: localizations.contentLabel,
+                          hintText: localizations.contentHint,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -298,7 +353,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                 });
                               }
                             },
-                            items: _styleOptions.entries.map<DropdownMenuItem<String>>((entry) {
+                            items: styleOptions.entries.map<DropdownMenuItem<String>>((entry) {
                               return DropdownMenuItem<String>(
                                 value: entry.key,
                                 child: Text(entry.value),
@@ -323,10 +378,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
                             ),
                           ),
                           child: _isLoading
-                              ? const Row(
+                              ? Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    SizedBox(
+                                    const SizedBox(
                                       width: 20,
                                       height: 20,
                                       child: CircularProgressIndicator(
@@ -334,24 +389,24 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                         strokeWidth: 2,
                                       ),
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Text(
-                                      'AI가 일기를 각색하고 있어요...',
-                                      style: TextStyle(
+                                      localizations.aiEnhancing,
+                                      style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ],
                                 )
-                              : const Row(
+                              : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.auto_awesome, color: Colors.white),
-                                    SizedBox(width: 8),
+                                    const Icon(Icons.auto_awesome, color: Colors.white),
+                                    const SizedBox(width: 8),
                                     Text(
-                                      'AI로 일기 각색하기',
-                                      style: TextStyle(
+                                      localizations.enhanceWithAI,
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
@@ -375,17 +430,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.auto_awesome,
                               color: Color(0xFF6366F1),
                               size: 24,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'AI가 각색한 일기',
-                              style: TextStyle(
+                              localizations.aiEnhancedTitle,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF1E293B),
@@ -425,9 +480,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              '일기 저장하기',
-                              style: TextStyle(
+                            child: Text(
+                              localizations.saveDiary,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -442,10 +497,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
               ],
               
               const SizedBox(height: 40),
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -485,11 +542,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _generateDiary() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final localizations = AppLocalizations(localizationService.currentLanguage);
+    
     if (_titleController.text.trim().isEmpty || _contentController.text.trim().isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('제목과 내용을 모두 입력해주세요!'),
+        SnackBar(
+          content: Text(localizations.fillAllFields),
           backgroundColor: Colors.red,
         ),
       );
@@ -501,10 +561,15 @@ class _DiaryScreenState extends State<DiaryScreen> {
     });
 
     try {
+      // 사용자가 입력한 언어를 감지하여 AI 프롬프트 언어 결정
+      final isKoreanInput = _isKoreanText(_titleController.text + ' ' + _contentController.text);
+      final aiLanguage = isKoreanInput ? 'ko' : 'en';
+      
       final generatedContent = await _diaryService.generateDiaryWithAI(
         title: _titleController.text.trim(),
         originalContent: _contentController.text.trim(),
         style: _selectedStyle,
+        language: aiLanguage,
       );
 
       setState(() {
@@ -514,7 +579,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('AI 일기 생성 실패: $e'),
+          content: Text('${localizations.diaryGenerationFailed}: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -528,6 +593,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _saveDiary() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final localizations = AppLocalizations(localizationService.currentLanguage);
+    
     try {
       if (_existingDiary != null && _generatedDiary != null) {
         // 기존 일기 업데이트
@@ -552,9 +620,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('일기가 성공적으로 저장되었습니다! 🎉'),
-          backgroundColor: Color(0xFF10B981),
+        SnackBar(
+          content: Text(localizations.diarySaved),
+          backgroundColor: const Color(0xFF10B981),
         ),
       );
 
@@ -564,10 +632,20 @@ class _DiaryScreenState extends State<DiaryScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('일기 저장 실패: $e'),
+          content: Text('${localizations.diarySaveFailed}: $e'),
           backgroundColor: Colors.red,
         ),
       );
     }
+  }
+  
+  // 한국어 텍스트인지 감지하는 함수
+  bool _isKoreanText(String text) {
+    final koreanRegex = RegExp(r'[가-힣]');
+    final koreanMatches = koreanRegex.allMatches(text).length;
+    final totalChars = text.replaceAll(RegExp(r'\s+'), '').length;
+    
+    // 텍스트의 30% 이상이 한국어면 한국어로 판단
+    return totalChars > 0 && (koreanMatches / totalChars) > 0.3;
   }
 }

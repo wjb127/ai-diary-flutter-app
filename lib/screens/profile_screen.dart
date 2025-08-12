@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
+import '../services/localization_service.dart';
 import 'auth_screen.dart';
 import 'app_info_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,18 +51,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = _authService.currentUser;
     final isGuest = user?.id == 'guest-user-id';
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '프로필',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+    return Consumer<LocalizationService>(
+      builder: (context, localizationService, child) {
+        final localizations = AppLocalizations(localizationService.currentLanguage);
+        
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              localizations.profile,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              // 언어 전환 버튼
+              Container(
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => localizationService.toggleLanguage(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            localizationService.isKorean ? '🇰🇷' : '🇺🇸',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            localizationService.isKorean ? 'KOR' : 'ENG',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF6366F1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -89,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      isGuest ? '게스트 사용자' : (user?.email ?? '사용자'),
+                      isGuest ? localizations.guestUser : (user?.email ?? localizations.user),
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -104,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _subscriptionService.isPremium ? '프리미엄 회원' : '무료 회원',
+                        _subscriptionService.isPremium ? localizations.premiumMember : localizations.freeMember,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -119,31 +170,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // 게스트 모드일 때만 로그인 유도
               if (isGuest) ...[
-                _buildLoginPrompt(),
+                _buildLoginPrompt(localizations),
                 const SizedBox(height: 24),
               ],
 
               // 구독 관리
-              _buildSubscriptionSection(),
+              _buildSubscriptionSection(localizations),
 
               const SizedBox(height: 16),
 
               // 계정 관리
-              _buildAccountSection(isGuest),
+              _buildAccountSection(isGuest, localizations),
 
               const SizedBox(height: 24),
 
               // 로그아웃 버튼 (게스트가 아닐 때만)
               if (!isGuest)
-                _buildLogoutButton(),
+                _buildLogoutButton(localizations),
             ],
           ),
         ),
       ),
+        );
+      },
     );
   }
 
-  Widget _buildLoginPrompt() {
+  Widget _buildLoginPrompt(AppLocalizations localizations) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -159,19 +212,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Color(0xFF0EA5E9),
           ),
           const SizedBox(height: 12),
-          const Text(
-            '로그인하여 데이터 동기화',
-            style: TextStyle(
+          Text(
+            localizations.loginForSync,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Color(0xFF1E293B),
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            '계정을 만들면 모든 기기에서 일기를 동기화할 수 있습니다.',
+          Text(
+            localizations.loginSyncDesc,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
             ),
@@ -188,9 +241,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                '로그인 / 회원가입',
-                style: TextStyle(
+              child: Text(
+                localizations.loginSignup,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -202,7 +255,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSubscriptionSection() {
+  Widget _buildSubscriptionSection(AppLocalizations localizations) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -245,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAccountSection(bool isGuest) {
+  Widget _buildAccountSection(bool isGuest, AppLocalizations localizations) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -328,7 +381,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(AppLocalizations localizations) {
     return SizedBox(
       width: double.infinity,
       height: 48,
