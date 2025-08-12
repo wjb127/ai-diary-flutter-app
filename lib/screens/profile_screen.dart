@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import 'auth_screen.dart';
+import 'app_info_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _subscriptionService = SubscriptionService(_authService);
     _initializeSubscription();
+    
+    // AuthService의 상태 변화 감지
+    _authService.addListener(_onAuthStateChanged);
+  }
+  
+  @override
+  void dispose() {
+    _authService.removeListener(_onAuthStateChanged);
+    super.dispose();
+  }
+
+  void _onAuthStateChanged() {
+    if (mounted) {
+      setState(() {}); // 인증 상태 변화 시 UI 새로고침
+    }
   }
 
   Future<void> _initializeSubscription() async {
@@ -258,19 +275,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.info_outline,
             title: '앱 정보',
             subtitle: 'v1.0.0',
-            onTap: () {},
+            onTap: () => _navigateToAppInfo(),
           ),
           _buildMenuTile(
             icon: Icons.privacy_tip_outlined,
             title: '개인정보처리방침',
             subtitle: '개인정보 보호 정책',
-            onTap: () {},
+            onTap: () => _openPrivacyPolicy(),
           ),
           _buildMenuTile(
             icon: Icons.description_outlined,
             title: '이용약관',
             subtitle: '서비스 이용약관',
-            onTap: () {},
+            onTap: () => _openTermsOfService(),
           ),
         ],
       ),
@@ -340,31 +357,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  void _navigateToAppInfo() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const AppInfoScreen()),
+    );
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    const url = 'https://raw.githubusercontent.com/wjb127/ai-diary-flutter-app/main/docs/privacy_policy.txt';
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('개인정보처리방침을 열 수 없습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _openTermsOfService() async {
+    const url = 'https://raw.githubusercontent.com/wjb127/ai-diary-flutter-app/main/docs/terms_of_service.txt';
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이용약관을 열 수 없습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _restorePurchases() async {
-    setState(() => _isLoading = true);
+    // 로딩 다이얼로그 표시
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('구매 내역을 복원하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+    }
 
     try {
       final success = await _subscriptionService.restorePurchases();
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? '구매가 복원되었습니다.' : '복원할 구매 내역이 없습니다.'),
-            backgroundColor: success ? const Color(0xFF10B981) : const Color(0xFF64748B),
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
+        
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(
+                  success ? Icons.check_circle : Icons.info,
+                  color: success ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                ),
+                const SizedBox(width: 8),
+                Text(success ? '복원 완료' : '복원 내역 없음'),
+              ],
+            ),
+            content: Text(
+              success 
+                ? '구매 내역이 성공적으로 복원되었습니다.\n프리미엄 기능을 이용하실 수 있습니다.' 
+                : '복원할 구매 내역이 없습니다.\n새로 구독하시려면 프리미엄 구독 메뉴를 이용해주세요.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              ),
+            ],
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('복원 중 오류가 발생했습니다.'),
-            backgroundColor: Color(0xFFEF4444),
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
+        
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.error, color: Color(0xFFEF4444)),
+                SizedBox(width: 8),
+                Text('복원 실패'),
+              ],
+            ),
+            content: const Text(
+              '구매 내역 복원 중 오류가 발생했습니다.\n잠시 후 다시 시도해주세요.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('확인'),
+              ),
+            ],
           ),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
