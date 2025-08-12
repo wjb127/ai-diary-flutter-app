@@ -20,6 +20,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   bool _isLoading = false;
   String? _generatedDiary;
   DiaryEntry? _existingDiary;
+  bool _showCalendar = false; // 달력 표시 여부
   
   // 문체 선택 관련
   String _selectedStyle = 'emotional'; // 기본값: 감성적
@@ -63,84 +64,144 @@ class _DiaryScreenState extends State<DiaryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 달력 섹션
+              // 날짜 선택 섹션
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        '날짜 선택',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
+                      // 날짜 선택 헤더
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // 왼쪽 화살표
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedDay = _selectedDay.subtract(const Duration(days: 1));
+                                _focusedDay = _selectedDay;
+                              });
+                              _loadDiaryForDate(_selectedDay);
+                            },
+                            icon: const Icon(Icons.chevron_left),
+                            color: const Color(0xFF6366F1),
+                            iconSize: 32,
+                          ),
+                          
+                          // 중앙 날짜 표시 (클릭 시 달력 표시)
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _showCalendar = !_showCalendar;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF6366F1).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_today,
+                                      size: 18,
+                                      color: Color(0xFF6366F1),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        DateFormat('yyyy년 MM월 dd일').format(_selectedDay),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF6366F1),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      _showCalendar ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                      size: 18,
+                                      color: const Color(0xFF6366F1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          // 오른쪽 화살표
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _selectedDay = _selectedDay.add(const Duration(days: 1));
+                                _focusedDay = _selectedDay;
+                              });
+                              _loadDiaryForDate(_selectedDay);
+                            },
+                            icon: const Icon(Icons.chevron_right),
+                            color: const Color(0xFF6366F1),
+                            iconSize: 32,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      TableCalendar<String>(
-                        firstDay: DateTime.utc(2020, 1, 1),
-                        lastDay: DateTime.utc(2030, 12, 31),
-                        focusedDay: _focusedDay,
-                        calendarFormat: CalendarFormat.month,
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                        onDaySelected: (selectedDay, focusedDay) {
-                          setState(() {
-                            _selectedDay = selectedDay;
-                            _focusedDay = focusedDay;
-                          });
-                          _loadDiaryForDate(selectedDay);
-                        },
-                        calendarStyle: const CalendarStyle(
-                          outsideDaysVisible: false,
-                          selectedDecoration: BoxDecoration(
-                            color: Color(0xFF6366F1),
-                            shape: BoxShape.circle,
+                      
+                      // 달력 (조건부 표시)
+                      if (_showCalendar) ...[
+                        const SizedBox(height: 16),
+                        TableCalendar<String>(
+                          firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: _focusedDay,
+                          calendarFormat: CalendarFormat.month,
+                          startingDayOfWeek: StartingDayOfWeek.monday,
+                          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                          onDaySelected: (selectedDay, focusedDay) {
+                            setState(() {
+                              _selectedDay = selectedDay;
+                              _focusedDay = focusedDay;
+                              _showCalendar = false; // 날짜 선택 후 달력 닫기
+                            });
+                            _loadDiaryForDate(selectedDay);
+                          },
+                          calendarStyle: const CalendarStyle(
+                            outsideDaysVisible: false,
+                            selectedDecoration: BoxDecoration(
+                              color: Color(0xFF6366F1),
+                              shape: BoxShape.circle,
                           ),
                           todayDecoration: BoxDecoration(
                             color: Color(0xFF10B981),
                             shape: BoxShape.circle,
                           ),
-                          markerDecoration: BoxDecoration(
-                            color: Color(0xFFF59E0B),
-                            shape: BoxShape.circle,
+                            markerDecoration: BoxDecoration(
+                              color: Color(0xFFF59E0B),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          headerStyle: const HeaderStyle(
+                            titleCentered: true,
+                            formatButtonVisible: false,
+                            titleTextStyle: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E293B),
+                            ),
                           ),
                         ),
-                        headerStyle: const HeaderStyle(
-                          titleCentered: true,
-                          formatButtonVisible: false,
-                          titleTextStyle: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
-                          ),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // 선택된 날짜 표시
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(_selectedDay)} 일기',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6366F1),
-                  ),
-                  textAlign: TextAlign.center,
                 ),
               ),
               
