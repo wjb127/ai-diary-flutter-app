@@ -23,8 +23,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   Future<void> _initializeSubscription() async {
-    await _subscriptionService.initialize();
-    await _loadProducts();
+    try {
+      await _subscriptionService.initialize();
+      await _loadProducts();
+    } catch (e) {
+      // 구독 서비스 초기화 실패 시 안전하게 처리
+      print('구독 서비스 초기화 실패: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _loadProducts() async {
@@ -37,54 +43,97 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      print('상품 로드 실패: $e');
       setState(() => _isLoading = false);
+      // 에러가 발생해도 앱이 꺼지지 않도록 UI 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('구독 정보를 불러올 수 없습니다. 개발자 모드에서 실행 중입니다.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _handlePurchase() async {
     setState(() => _isLoading = true);
     
-    bool success = false;
-    if (_selectedIndex == 0) {
-      success = await _subscriptionService.purchaseMonthly();
-    } else {
-      success = await _subscriptionService.purchaseYearly();
-    }
-    
-    setState(() => _isLoading = false);
-    
-    if (success && mounted) {
-      Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('프리미엄 구독이 활성화되었습니다! 🎉'),
-          backgroundColor: Color(0xFF10B981),
-        ),
-      );
+    try {
+      bool success = false;
+      if (_selectedIndex == 0) {
+        success = await _subscriptionService.purchaseMonthly();
+      } else {
+        success = await _subscriptionService.purchaseYearly();
+      }
+      
+      setState(() => _isLoading = false);
+      
+      if (success && mounted) {
+        Navigator.of(context).pop(true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('프리미엄 구독이 활성화되었습니다! 🎉'),
+            backgroundColor: Color(0xFF10B981),
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('구독을 처리할 수 없습니다. 개발자 모드에서는 구독이 제한됩니다.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      print('구매 처리 실패: $e');
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('구독 처리 중 오류가 발생했습니다.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _handleRestore() async {
     setState(() => _isLoading = true);
     
-    final success = await _subscriptionService.restorePurchases();
-    
-    setState(() => _isLoading = false);
-    
-    if (mounted) {
-      if (success) {
-        Navigator.of(context).pop(true);
+    try {
+      final success = await _subscriptionService.restorePurchases();
+      
+      setState(() => _isLoading = false);
+      
+      if (mounted) {
+        if (success) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('구독이 복원되었습니다! ✨'),
+              backgroundColor: Color(0xFF10B981),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('복원할 구독이 없습니다'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('구매 복원 실패: $e');
+      setState(() => _isLoading = false);
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('구독이 복원되었습니다! ✨'),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('복원할 구독이 없습니다'),
-            backgroundColor: Colors.orange,
+            content: Text('구독 복원 중 오류가 발생했습니다.'),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -194,6 +243,43 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     ),
                     
                     const SizedBox(height: 30),
+                    
+                    // 개발자 모드 알림 (상품이 없는 경우)
+                    if (_products.isEmpty) ...[
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.orange, size: 24),
+                            SizedBox(height: 8),
+                            Text(
+                              '개발자 모드',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              '현재 개발자 환경에서 실행되어 구독 기능이 제한됩니다.\n실제 앱에서는 정상적으로 작동합니다.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     
                     // 구독 플랜
                     const Text(

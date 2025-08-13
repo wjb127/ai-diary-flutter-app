@@ -30,6 +30,13 @@ class SubscriptionService {
     try {
       _log('RevenueCat 초기화 시작');
       
+      // 웹 플랫폼은 구독을 지원하지 않음
+      if (kIsWeb) {
+        _log('웹 플랫폼은 구독을 지원하지 않습니다');
+        _isInitialized = true;
+        return;
+      }
+      
       // API 키가 없으면 초기화를 건너뜀 (개발/테스트 환경)
       if (_revenueCatApiKey.isEmpty) {
         _log('RevenueCat API 키가 없습니다. 구독 기능이 비활성화됩니다.');
@@ -46,7 +53,8 @@ class SubscriptionService {
       } else if (defaultTargetPlatform == TargetPlatform.android) {
         configuration = PurchasesConfiguration(_revenueCatApiKey);
       } else {
-        _log('웹 플랫폼은 구독을 지원하지 않습니다');
+        _log('지원하지 않는 플랫폼입니다');
+        _isInitialized = true;
         return;
       }
       
@@ -68,6 +76,7 @@ class SubscriptionService {
       _log('RevenueCat 초기화 완료');
     } catch (e) {
       _log('RevenueCat 초기화 실패', e.toString());
+      _isInitialized = true; // 실패해도 초기화를 완료로 표시
     }
   }
   
@@ -81,6 +90,12 @@ class SubscriptionService {
   }
   
   Future<List<StoreProduct>> getProducts() async {
+    // 웹이나 API 키가 없는 경우 빈 리스트 반환
+    if (kIsWeb || _revenueCatApiKey.isEmpty || !_isInitialized) {
+      _log('구독 서비스가 초기화되지 않음');
+      return [];
+    }
+    
     try {
       final products = await Purchases.getProducts(
         [monthlyProductId, yearlyProductId],
@@ -102,11 +117,25 @@ class SubscriptionService {
   }
   
   Future<bool> _purchase(String productId) async {
+    // 웹이나 API 키가 없는 경우 실패 반환
+    if (kIsWeb || _revenueCatApiKey.isEmpty || !_isInitialized) {
+      _log('구매 불가 - 구독 서비스가 초기화되지 않음');
+      return false;
+    }
+    
     try {
       _log('구매 시도', productId);
       
       final products = await getProducts();
-      final product = products.firstWhere((p) => p.identifier == productId);
+      if (products.isEmpty) {
+        _log('구매 불가 - 상품이 없음');
+        return false;
+      }
+      
+      final product = products.firstWhere(
+        (p) => p.identifier == productId,
+        orElse: () => products.first,
+      );
       
       final purchaseResult = await Purchases.purchaseStoreProduct(product);
       
@@ -123,6 +152,12 @@ class SubscriptionService {
   }
   
   Future<bool> restorePurchases() async {
+    // 웹이나 API 키가 없는 경우 실패 반환
+    if (kIsWeb || _revenueCatApiKey.isEmpty || !_isInitialized) {
+      _log('복원 불가 - 구독 서비스가 초기화되지 않음');
+      return false;
+    }
+    
     try {
       _log('구매 복원 시도');
       _customerInfo = await Purchases.restorePurchases();
