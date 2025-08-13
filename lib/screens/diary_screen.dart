@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/diary_service.dart';
 import '../services/localization_service.dart';
 import '../models/diary_model.dart';
@@ -469,6 +471,47 @@ class _DiaryScreenState extends State<DiaryScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
+                        
+                        // 복사 및 공유 버튼들
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => _copyToClipboard(_generatedDiary!),
+                                icon: const Icon(Icons.copy, size: 18),
+                                label: Text(localizations.isKorean ? '복사' : 'Copy'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: const BorderSide(color: Color(0xFF6366F1)),
+                                  foregroundColor: const Color(0xFF6366F1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => _shareAIDiary(),
+                                icon: const Icon(Icons.share, size: 18),
+                                label: Text(localizations.isKorean ? '공유' : 'Share'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: const BorderSide(color: Color(0xFF8B5CF6)),
+                                  foregroundColor: const Color(0xFF8B5CF6),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // 저장 버튼
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -638,6 +681,101 @@ class _DiaryScreenState extends State<DiaryScreen> {
         SnackBar(
           content: Text('${localizations.diarySaveFailed}: $e'),
           backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // 클립보드에 복사하는 함수
+  Future<void> _copyToClipboard(String content) async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    try {
+      await Clipboard.setData(ClipboardData(text: content));
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizationService.isKorean 
+                ? '✅ 클립보드에 복사되었습니다' 
+                : '✅ Copied to clipboard'
+          ),
+          backgroundColor: const Color(0xFF10B981),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizationService.isKorean 
+                ? '❌ 복사에 실패했습니다' 
+                : '❌ Failed to copy'
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  // AI 일기를 공유하는 함수
+  Future<void> _shareAIDiary() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    if (_generatedDiary == null) return;
+
+    try {
+      final title = _titleController.text.isNotEmpty 
+          ? _titleController.text 
+          : (localizationService.isKorean ? '내 AI 일기' : 'My AI Diary');
+          
+      final dateStr = DateFormat('yyyy년 MM월 dd일').format(_selectedDay);
+      
+      final shareText = localizationService.isKorean
+          ? '''📝 $title ($dateStr)
+
+$_generatedDiary
+
+✨ AI 일기장으로 작성된 일기입니다'''
+          : '''📝 $title ($dateStr)
+
+$_generatedDiary
+
+✨ Created with AI Diary App''';
+
+      final result = await Share.shareWithResult(
+        shareText,
+        subject: title,
+      );
+
+      // 공유 결과에 따른 피드백 (선택적)
+      if (result.status == ShareResultStatus.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizationService.isKorean 
+                  ? '✅ 공유되었습니다' 
+                  : '✅ Shared successfully'
+            ),
+            backgroundColor: const Color(0xFF10B981),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizationService.isKorean 
+                ? '❌ 공유에 실패했습니다' 
+                : '❌ Failed to share'
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
         ),
       );
     }

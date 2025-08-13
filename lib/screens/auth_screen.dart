@@ -266,44 +266,30 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo & Title
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 간단한 제목만 (아이콘 제거, 위치를 위로)
+                  const SizedBox(height: 40),
+                  const Text(
+                    'AI 일기장',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
                     ),
-                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
-                    Icons.auto_stories,
-                    size: 40,
-                    color: Colors.white,
+                  const SizedBox(height: 8),
+                  const Text(
+                    '당신의 일상을 아름답게 기록하세요',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'AI 일기장',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '당신의 일상을 아름답게 기록하세요',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-                const SizedBox(height: 40),
+                  const SizedBox(height: 40),
                 
                 // Tab Bar
                 Container(
@@ -336,21 +322,24 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                  const SizedBox(height: 32),
                 
-                // Tab Views
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // Login Form
-                      _buildLoginForm(),
-                      // Signup Form
-                      _buildSignupForm(),
-                    ],
+                  // Tab Views - 고정 높이로 변경하여 키보드 대응 개선
+                  SizedBox(
+                    height: 400,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Login Form
+                        _buildLoginForm(),
+                        // Signup Form
+                        _buildSignupForm(),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
