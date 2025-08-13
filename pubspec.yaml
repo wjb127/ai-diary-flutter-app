@@ -68,6 +68,7 @@ dependencies:
   
   # In-App Purchase & Subscription
   purchases_flutter: ^8.1.2
+  in_app_purchase: ^3.2.3
 
 dev_dependencies:
   flutter_test:

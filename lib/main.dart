@@ -15,6 +15,7 @@ import 'screens/auth_screen.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
+import 'services/local_subscription_service.dart';
 import 'widgets/responsive_wrapper.dart';
 
 const String kSupabaseUrl = String.fromEnvironment(
@@ -46,8 +47,11 @@ void main() async {
   _authService.signInAsGuest();
   
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => LocalizationService(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LocalizationService()),
+        ChangeNotifierProvider(create: (context) => LocalSubscriptionService()),
+      ],
       child: MyApp(),
     ),
   );

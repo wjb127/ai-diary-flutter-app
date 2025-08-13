@@ -123,7 +123,7 @@ diary_entries (
 ### AI Integration
 - **Supabase Edge Function**: `generate-diary` function calls Claude API
 - **Fallback**: Mock diary generation when Edge Function fails
-- **API**: Uses Claude 3 Sonnet for diary enhancement
+- **API**: Uses Claude Sonnet 4 for diary enhancement
 - **Privacy**: API keys stored only in Edge Functions, not client
 
 ### Subscription System

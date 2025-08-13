@@ -122,7 +122,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               // 날짜 선택 섹션
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(12.0), // 16->12로 축소
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -213,7 +213,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       
                       // 달력 (조건부 표시)
                       if (_showCalendar) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8), // 16->8로 축소
                         TableCalendar<String>(
                           firstDay: DateTime.utc(2020, 1, 1),
                           lastDay: DateTime.utc(2030, 12, 31),
@@ -277,7 +277,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                           color: Color(0xFF1E293B),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8), // 16->8로 축소
                       
                       // 제목 입력
                       TextField(
@@ -302,12 +302,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         ),
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8), // 16->8로 축소
                       
                       // 내용 입력
                       TextField(
                         controller: _contentController,
-                        maxLines: 8,
+                        maxLines: 5, // 8->5로 축소 (화면 공간 절약)
                         decoration: InputDecoration(
                           labelText: localizations.contentLabel,
                           hintText: localizations.contentHint,
@@ -329,7 +329,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         ),
                       ),
                       
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12), // 20->12로 축소
                       
                       // 문체 선택 드롭다운
                       Container(
@@ -363,7 +363,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         ),
                       ),
                       
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 6), // 12->6으로 축소
                       
                       // AI 각색 버튼
                       SizedBox(

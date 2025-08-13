@@ -17,7 +17,7 @@ Flutter와 Supabase, Claude AI를 활용한 스마트 일기 앱입니다. 사�
   - 데이터베이스: PostgreSQL
   - 인증: Supabase Auth
   - Edge Functions: Deno + TypeScript
-- **AI**: Claude 3 Sonnet (Anthropic)
+- **AI**: Claude Sonnet 4 (Anthropic)
 - **상태 관리**: Provider
 - **내비게이션**: GoRouter
 

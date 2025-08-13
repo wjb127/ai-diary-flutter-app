@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 일기 앱 아이콘 생성기</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        canvas {
+            border-radius: 180px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI 일기 앱 아이콘</h1>
+        <canvas id="canvas" width="1024" height="1024"></canvas>
+        <br>
+        <button onclick="downloadIcon()">아이콘 다운로드 (1024x1024)</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 그라디언트 배경
+        const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1024, 1024);
+        
+        // 중앙 원 (흰색 배경)
+        ctx.beginPath();
+        ctx.arc(512, 512, 380, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fill();
+        
+        // AI 로봇 아이콘 그리기
+        ctx.fillStyle = '#764ba2';
+        
+        // 머리
+        ctx.beginPath();
+        ctx.arc(512, 420, 120, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 눈 (빛나는 효과)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(480, 410, 20, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(544, 410, 20, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 눈동자
+        ctx.fillStyle = '#667eea';
+        ctx.beginPath();
+        ctx.arc(480, 410, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(544, 410, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // 펜 아이콘
+        ctx.strokeStyle = '#764ba2';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        
+        // 펜 몸체
+        ctx.beginPath();
+        ctx.moveTo(420, 580);
+        ctx.lineTo(580, 740);
+        ctx.stroke();
+        
+        // 펜 끝
+        ctx.beginPath();
+        ctx.moveTo(570, 730);
+        ctx.lineTo(600, 760);
+        ctx.stroke();
+        
+        // 종이 라인들 (일기장 느낌)
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([15, 10]);
+        
+        for(let y = 600; y < 800; y += 40) {
+            ctx.beginPath();
+            ctx.moveTo(350, y);
+            ctx.lineTo(674, y);
+            ctx.stroke();
+        }
+        
+        // AI 스파클 효과
+        ctx.fillStyle = '#ffd700';
+        const sparkles = [
+            {x: 380, y: 320, size: 15},
+            {x: 640, y: 350, size: 12},
+            {x: 360, y: 480, size: 10},
+            {x: 660, y: 500, size: 14},
+            {x: 400, y: 700, size: 11},
+            {x: 620, y: 680, size: 13}
+        ];
+        
+        sparkles.forEach(sparkle => {
+            ctx.save();
+            ctx.translate(sparkle.x, sparkle.y);
+            
+            // 별 모양 그리기
+            ctx.beginPath();
+            for(let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 * i) / 8;
+                const radius = i % 2 === 0 ? sparkle.size : sparkle.size / 2;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                if(i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        });
+        
+        // 타이틀 텍스트
+        ctx.font = 'bold 80px -apple-system, BlinkMacSystemFont, sans-serif';
+        ctx.fillStyle = '#764ba2';
+        ctx.textAlign = 'center';
+        ctx.fillText('AI', 512, 280);
+        
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'ai_diary_app_icon_1024.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
