@@ -525,7 +525,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
           _contentController.text = diary.originalContent;
           _generatedDiary = diary.generatedContent;
         } else {
-          _titleController.clear();
+          // 새로운 일기의 경우 날짜 + diary 형태로 기본 제목 설정
+          final formattedDate = DateFormat('yyyy.MM.dd').format(date);
+          _titleController.text = '$formattedDate diary';
           _contentController.clear();
           _generatedDiary = null;
         }
@@ -534,7 +536,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
       // 로그인되지 않은 상태일 수 있으므로 조용히 처리
       setState(() {
         _existingDiary = null;
-        _titleController.clear();
+        // 오류 상황에서도 기본 제목 설정
+        final formattedDate = DateFormat('yyyy.MM.dd').format(date);
+        _titleController.text = '$formattedDate diary';
         _contentController.clear();
         _generatedDiary = null;
       });
