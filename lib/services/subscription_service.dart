@@ -117,6 +117,31 @@ class SubscriptionService extends ChangeNotifier {
     return _purchase(yearlyProductId);
   }
   
+  Future<bool> purchaseProduct(StoreProduct product) async {
+    // 웹이나 API 키가 없는 경우 실패 반환
+    if (kIsWeb || _revenueCatApiKey.isEmpty || !_isInitialized) {
+      _log('구매 불가 - 구독 서비스가 초기화되지 않음');
+      return false;
+    }
+    
+    try {
+      _log('구매 시도', product.identifier);
+      
+      final purchaseResult = await Purchases.purchaseStoreProduct(product);
+      
+      _customerInfo = purchaseResult;
+      notifyListeners();
+      
+      final success = _customerInfo?.entitlements.all[_entitlementId]?.isActive ?? false;
+      _log('구매 결과', success ? '성공' : '실패');
+      
+      return success;
+    } catch (e) {
+      _log('구매 실패', e.toString());
+      return false;
+    }
+  }
+  
   Future<bool> _purchase(String productId) async {
     // 웹이나 API 키가 없는 경우 실패 반환
     if (kIsWeb || _revenueCatApiKey.isEmpty || !_isInitialized) {
