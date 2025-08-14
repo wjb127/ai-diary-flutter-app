@@ -149,6 +149,55 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
+          // 구독 서비스 준비 중 안내
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFFCD34D),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.construction,
+                  color: Color(0xFFF59E0B),
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isKorean ? '구독 서비스 준비 중' : 'Subscription Coming Soon',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        isKorean 
+                          ? '현재 하루 10회 무료로 이용 가능합니다' 
+                          : 'Currently available 10 times per day for free',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          
           // 헤더
           const CircleAvatar(
             radius: 40,
@@ -193,22 +242,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             }).toList(),
             const SizedBox(height: 24),
             
-            // 구매 버튼
+            // 구매 버튼 (준비 중이므로 비활성화)
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: _selectedIndex >= 0 && _selectedIndex < _products.length
-                    ? () => _purchaseProduct(_products[_selectedIndex])
-                    : null,
+                onPressed: null, // 준비 중이므로 비활성화
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: Text(
-                  isKorean ? '구독 시작하기' : 'Start Subscription',
+                  isKorean ? '구독 서비스 준비 중' : 'Coming Soon',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

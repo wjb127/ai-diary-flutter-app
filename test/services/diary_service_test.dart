@@ -8,7 +8,7 @@ import 'package:ai_diary_app/models/diary_model.dart';
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 class MockGoTrueClient extends Mock implements GoTrueClient {}
 class MockUser extends Mock implements User {}
-class MockQueryBuilder extends Mock implements PostgrestQueryBuilder<PostgrestList> {}
+class MockQueryBuilder extends Mock implements SupabaseQueryBuilder {}
 class MockFilterBuilder extends Mock implements PostgrestFilterBuilder<PostgrestList> {}
 class MockFunctionsClient extends Mock implements FunctionsClient {}
 class MockFunctionResponse extends Mock implements FunctionResponse {}

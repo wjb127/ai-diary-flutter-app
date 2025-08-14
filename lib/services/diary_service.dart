@@ -192,9 +192,9 @@ class DiaryService {
         throw Exception('AI 일기 생성 실패');
       }
     } catch (e) {
-      _log('Edge Function 오류', e.toString());
-      // Mock 데이터 사용하지 않고 오류 발생
-      throw Exception('AI 서비스 연결에 실패했습니다: $e');
+      _log('Edge Function 오류, Mock 데이터 사용', e.toString());
+      // Edge Function 실패 시 Mock 데이터 반환 (게스트 모드 지원)
+      return _generateMockDiary(title, originalContent, style, language);
     }
   }
 
