@@ -158,7 +158,15 @@ class DiaryService {
     final filteredTitle = ContentPolicy.filterPersonalInfo(title);
 
     try {
-      _log('Edge Function 호출 시도');
+      _log('Edge Function 호출 시도', {
+        'url': 'generate-diary',
+        'body': {
+          'title': title,
+          'content': originalContent.substring(0, originalContent.length > 50 ? 50 : originalContent.length),
+          'style': style,
+          'language': language,
+        }
+      });
       
       final response = await _supabase.functions.invoke(
         'generate-diary',
@@ -170,7 +178,12 @@ class DiaryService {
         },
       );
 
-      _log('Edge Function 응답', response.data);
+      _log('Edge Function 응답', {
+        'status': response.status,
+        'hasData': response.data != null,
+        'dataType': response.data?.runtimeType.toString(),
+        'data': response.data,
+      });
 
       if (response.data != null && response.data['generated_content'] != null) {
         _log('AI 생성 성공');
@@ -179,9 +192,9 @@ class DiaryService {
         throw Exception('AI 일기 생성 실패');
       }
     } catch (e) {
-      _log('Edge Function 실패, Mock 데이터 사용', e.toString());
-      await Future.delayed(const Duration(seconds: 2));
-      return _generateMockDiary(title, originalContent, style, language);
+      _log('Edge Function 오류', e.toString());
+      // Mock 데이터 사용하지 않고 오류 발생
+      throw Exception('AI 서비스 연결에 실패했습니다: $e');
     }
   }
 

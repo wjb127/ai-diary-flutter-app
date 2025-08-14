@@ -4,9 +4,11 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:go_router/go_router.dart';
 import '../services/diary_service.dart';
 import '../services/localization_service.dart';
 import '../services/analytics_service.dart';
+import '../services/auth_service.dart';
 import '../models/diary_model.dart';
 
 class DiaryScreen extends StatefulWidget {
@@ -673,6 +675,42 @@ class _DiaryScreenState extends State<DiaryScreen> {
       setState(() {
         _generatedDiary = generatedContent;
       });
+      
+      // AI 일기 완성 특수효과
+      if (!mounted) return;
+      
+      // 햅틱 피드백 (진동)
+      HapticFeedback.mediumImpact();
+      
+      // 성공 SnackBar 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: Colors.white),
+              const SizedBox(width: 8),
+              Text(
+                localizationService.isKorean 
+                    ? '✨ AI 일기가 완성되었습니다!' 
+                    : '✨ AI diary completed!',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF6366F1),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+      
+      // AI 생성 일기 섹션 자동 펼치기
+      setState(() {
+        _isGeneratedDiaryExpanded = true;
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -693,6 +731,33 @@ class _DiaryScreenState extends State<DiaryScreen> {
   Future<void> _saveDiary() async {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     final localizations = AppLocalizations(localizationService.currentLanguage);
+    final authService = Provider.of<AuthService>(context, listen: false);
+    
+    // 비로그인 상태 체크
+    if (authService.isGuestMode) {
+      // SnackBar로 로그인 안내
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizationService.isKorean 
+                ? '로그인이 필요합니다' 
+                : 'Login required to save',
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: localizationService.isKorean ? '로그인' : 'Login',
+            textColor: Colors.white,
+            onPressed: () {
+              // 로그인 화면으로 이동
+              context.push('/auth');
+            },
+          ),
+        ),
+      );
+      return;
+    }
     
     try {
       if (_existingDiary != null && _generatedDiary != null) {

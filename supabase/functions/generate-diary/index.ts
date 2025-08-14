@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts"
 import { corsHeaders } from "../_shared/cors.ts"
 
-// Verify user with supabase-js v2 using forwarded Authorization header
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-
-// These two are provided by the Supabase Edge Functions runtime by default
+// These are provided by the Supabase Edge Functions runtime by default
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
@@ -14,7 +11,7 @@ const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')
 // 문체별 프롬프트 정의
 const stylePrompts: Record<string, string> = {
   emotional: '따뜻하고 감성적인 문체로 각색해주세요. 감정을 풍부하게 표현하고 서정적으로 만들어주세요.',
-  epic: '고대 서사시나 중세 연대기 스타일의 대서사시 문체로 각색해주세요. 일리아드, 오디세이아, 베오울프 같은 고전 서사시처럼 장엄하고 웅장하게 서술해주세요. 일상의 사건을 역사적 대사건처럼 거창하고 운명적으로 묘사하되, 고전 문학의 품격과 무게감을 유지해주세요. 절대 게임 용어나 수치, 스탯 같은 요소는 사용하지 말고, 순수한 문학적 표현만 사용해주세요.',
+  epic: '중세 연대기나 크루세이더 왕조사 같은 역사 서사시 문체로 완전히 재창조해주세요. 일상의 평범한 사건들을 역사에 남을 대사건처럼 거창하게 각색하고, 인물들은 역사적 인물처럼 묘사해주세요. "서기 XXXX년", "이날 역사적인 사건이", "후세에 전해지기를" 같은 연대기적 표현을 사용하세요. 원본 내용을 그대로 반복하지 말고, 완전히 새로운 역사 서사시로 재탄생시켜주세요. 게임 용어나 수치는 절대 사용하지 마세요.',
   poetic: '시적이고 은유적인 문체로 각색해주세요. 운율과 리듬감을 살리고, 자연과 감정을 아름답게 묘사해주세요.',
   humorous: '유머러스하고 재미있는 문체로 각색해주세요. 웃음을 주는 표현과 농담을 섞어서 즐겁게 읽을 수 있도록 해주세요. ㅋㅋㅋ나 이모티콘도 적절히 사용해주세요.',
   philosophical: '철학적이고 사색적인 문체로 각색해주세요. 일상에서 깊은 의미를 찾고, 존재와 삶에 대한 성찰을 담아주세요.',
@@ -32,7 +29,8 @@ serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization') ?? ''
+    // 비로그인 사용자도 AI 기능 사용 가능
+    // const authHeader = req.headers.get('Authorization') ?? ''
 
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       return new Response(JSON.stringify({ error: 'Supabase runtime env is missing.' }), {
@@ -41,18 +39,8 @@ serve(async (req) => {
       })
     }
 
-    // RLS-aware client using anon key + forwarded JWT
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    })
-
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      })
-    }
+    // 인증 체크 제거 - 모든 사용자가 AI 기능 사용 가능
+    // 게스트 모드 사용자도 AI 일기 생성 가능
 
     const { title, content, style = 'emotional' } = await req.json()
     if (!title || !content) {
@@ -65,12 +53,14 @@ serve(async (req) => {
     // 선택된 문체에 맞는 프롬프트 가져오기
     const selectedPrompt = stylePrompts[style] || stylePrompts.emotional
 
-    // If no Anthropic key is configured, return a graceful mock
+    // If no Anthropic key is configured, return error
     if (!ANTHROPIC_API_KEY) {
-      const mock = generateMockDiary(title, content, style)
-      return new Response(JSON.stringify({ generated_content: mock }), {
+      return new Response(JSON.stringify({ 
+        error: 'AI 서비스가 현재 작동하지 않습니다. 관리자에게 문의해주세요.',
+        details: 'Anthropic API key not configured'
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+        status: 503,
       })
     }
 
@@ -89,17 +79,17 @@ serve(async (req) => {
           role: 'user',
           content: `다음 일기를 ${selectedPrompt}
 
-제목: ${title}
+원본 제목: ${title}
+원본 내용: ${content}
 
-내용: ${content}
+중요 지침:
+- 원본 내용을 그대로 반복하거나 인용하지 마세요
+- 완전히 새로운 문체로 재창조하여 각색해주세요  
+- 원본의 핵심 의미는 유지하되, 표현은 180도 다르게 바꿔주세요
+- 선택된 문체의 특징을 극대화하여 작성하세요
+- 원본과 완전히 다른 느낌의 텍스트를 생성하세요
 
-각색할 때 다음 사항을 고려해주세요:
-1) 원본의 의미와 감정은 유지하되 선택된 문체로 재창조
-2) 일상의 소소한 순간들을 문체에 맞게 특별하게 표현
-3) 읽는 사람이 몰입할 수 있도록 생생하게 묘사
-4) 각 문체의 특징을 명확하게 살려서 작성
-
-각색된 일기만 출력해주세요.`,
+각색된 일기만 출력해주세요. 원본을 절대 그대로 쓰지 마세요.`,
         }],
       }),
     })

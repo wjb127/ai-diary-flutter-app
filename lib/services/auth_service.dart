@@ -51,6 +51,9 @@ class AuthService extends ChangeNotifier {
   
   Stream<AuthState> get authStateStream => _supabase.auth.onAuthStateChange;
 
+  // 게스트 모드인지 확인하는 getter
+  bool get isGuestMode => _isGuestMode;
+
   Future<void> signInAnonymously() async {
     _log('익명 로그인 시도');
     
