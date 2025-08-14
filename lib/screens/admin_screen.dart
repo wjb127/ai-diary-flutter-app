@@ -247,7 +247,7 @@ class _AdminScreenState extends State<AdminScreen> {
         children: [
           // 개선된 사이드바
           Container(
-            width: 280,
+            width: 240,
             decoration: const BoxDecoration(
               color: Color(0xFF1A1B2E),
               boxShadow: [
@@ -543,50 +543,241 @@ class _AdminScreenState extends State<AdminScreen> {
 
   Widget _buildDashboard() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.deepPurple),
+            const SizedBox(height: 16),
+            Text('데이터 로듩 중...', style: TextStyle(color: Colors.grey.shade600)),
+          ],
+        ),
+      );
     }
     
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
+    return Container(
+      padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '대시보드 개요',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 24),
-          // 통계 카드들
-          Row(
-            children: [
-              _buildStatCard('전체 사용자', _totalUsers.toString(), Icons.people, Colors.blue),
-              const SizedBox(width: 16),
-              _buildStatCard('오늘 가입', _todayUsers.toString(), Icons.person_add, Colors.green),
-              const SizedBox(width: 16),
-              _buildStatCard('전체 일기', _totalDiaries.toString(), Icons.book, Colors.orange),
-              const SizedBox(width: 16),
-              _buildStatCard('오늘 일기', _todayDiaries.toString(), Icons.edit, Colors.purple),
-            ],
+          // 통계 카드들 - Row로 한 줄에 배치
+          SizedBox(
+            height: 140,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildModernStatCard(
+                    title: '전체 사용자',
+                    value: _totalUsers.toString(),
+                    icon: Icons.people_outline,
+                    color: const Color(0xFF6366F1),
+                    trend: '+12%',
+                    trendUp: true,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: _buildModernStatCard(
+                    title: '오늘 신규 가입',
+                    value: _todayUsers.toString(),
+                    icon: Icons.person_add_alt_outlined,
+                    color: const Color(0xFF10B981),
+                    trend: '+5%',
+                    trendUp: true,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: _buildModernStatCard(
+                    title: '전체 일기',
+                    value: _totalDiaries.toString(),
+                    icon: Icons.auto_stories_outlined,
+                    color: const Color(0xFFF59E0B),
+                    trend: '+23%',
+                    trendUp: true,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                Expanded(
+                  child: _buildModernStatCard(
+                    title: '오늘 작성',
+                    value: _todayDiaries.toString(),
+                    icon: Icons.edit_note_outlined,
+                    color: const Color(0xFF8B5CF6),
+                    trend: '-2%',
+                    trendUp: false,
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 32),
-          // 최근 사용자 목록
-          const Text(
-            '최근 가입 사용자',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
+          // 차트와 테이블 영역
           Expanded(
-            child: Card(
-              child: ListView.builder(
-                itemCount: _recentUsers.length,
-                itemBuilder: (context, index) {
-                  final user = _recentUsers[index];
-                  return ListTile(
-                    leading: const CircleAvatar(child: Icon(Icons.person)),
-                    title: Text(user['email'] ?? 'Unknown'),
-                    subtitle: Text('가입일: ${user['created_at']}'),
-                  );
-                },
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 왼쪽: 차트 영역 (70%)
+                Expanded(
+                  flex: 7,
+                  child: Column(
+                    children: [
+                      // 첫 번째 차트 행
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildChartCard(
+                                title: '주간 활동 통계',
+                                subtitle: '최근 7일',
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              child: _buildChartCard(
+                                title: '사용자 성장 추이',
+                                subtitle: '월별 통계',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // 두 번째 차트 행
+                      Expanded(
+                        child: _buildChartCard(
+                          title: '일기 작성 패턴 분석',
+                          subtitle: '시간대별 분포',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 24),
+                // 오른쪽: 최근 활동 목록 (30%)
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              '최근 활동',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text('전체 보기'),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        Expanded(
+                          child: ListView.separated(
+                            itemCount: _recentUsers.length,
+                            separatorBuilder: (_, __) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final user = _recentUsers[index];
+                              return _buildActivityItem(
+                                title: user['title'] ?? '제목 없음',
+                                subtitle: user['email'] ?? 'Unknown',
+                                time: _formatDate(user['created_at']),
+                                icon: Icons.edit_note,
+                                color: Colors.deepPurple,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildChartCard({
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: const Icon(Icons.more_vert),
+                onPressed: () {},
+                color: Colors.grey,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Center(
+              child: Text(
+                '차트 영역\n(구현 예정)',
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -594,37 +785,73 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
     );
   }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, color: color),
-                  const SizedBox(width: 8),
-                  Text(title, style: const TextStyle(fontSize: 14)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ],
+  
+  Widget _buildActivityItem({
+    required String title,
+    required String subtitle,
+    required String time,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            time,
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontSize: 11,
+            ),
+          ),
+        ],
       ),
     );
   }
+
 
   Widget _buildFunnelAnalysis() {
     return const Center(
