@@ -195,6 +195,12 @@ class AuthService extends ChangeNotifier {
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
         ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: 'com.test.aidiary.service',
+          redirectUri: Uri.parse(
+            'https://jihhsiijrxhazbxhoirl.supabase.co/auth/v1/callback',
+          ),
+        ),
       );
 
       final idToken = credential.identityToken;

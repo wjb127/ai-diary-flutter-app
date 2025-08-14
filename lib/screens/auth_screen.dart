@@ -315,8 +315,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 ),
                   const SizedBox(height: 32),
                 
-                  // Tab Views - 키보드 대응을 위해 유연한 높이 사용
-                  Flexible(
+                  // Tab Views - 고정 높이로 설정
+                  SizedBox(
+                    height: 600, // 충분한 고정 높이
                     child: TabBarView(
                       controller: _tabController,
                       children: [
@@ -506,9 +507,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           
           const SizedBox(height: 12),
           
-          // 애플 로그인 (iOS에서만 표시)
-          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
-            SizedBox(
+          // 애플 로그인
+          SizedBox(
               width: double.infinity,
               height: 52,
               child: OutlinedButton(

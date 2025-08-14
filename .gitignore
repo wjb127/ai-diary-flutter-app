@@ -18,11 +18,19 @@ ios/Runner/GoogleService-Info.plist
 lib/config/api_keys.dart
 .env
 .env.*
+android/key.properties
+*.jks
+*.keystore
 *.key
 *.p8
 *.p12
 *.jks
 *.keystore
+AuthKey_*.p8
+apple_secret_key.json
+apple_jwt_secret.txt
+generate_apple_jwt.js
+apple-app-site-association
 
 # IntelliJ related
 *.iml
