@@ -2,6 +2,6 @@
   "name": "ai-diary-flutter-app",
   "version": "1.0.0",
   "scripts": {
-    "build": "echo 'Flutter build handled by Vercel'"
+    "build": "if command -v flutter >/dev/null 2>&1; then flutter build web --release; else curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz | tar xJ && export PATH=\"$PATH:`pwd`/flutter/bin\" && flutter build web --release; fi"
   }
 }
