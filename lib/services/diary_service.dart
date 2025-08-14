@@ -3,6 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/diary_model.dart';
 import '../utils/content_policy.dart';
 
+// Supabase anon key (공개 가능)
+const String _anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppaGhzaWlqcnhoYXpieGhvaXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3MjQzMjcsImV4cCI6MjA3MDMwMDMyN30.sd8iZ2kPlAR9QTfvreCUZKWtziEnctPLHlYrPOpxyXU';
+
 class DiaryService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
@@ -150,6 +153,7 @@ class DiaryService {
     // AI 콘텐츠 정책: 안전성 검사
     if (!ContentPolicy.isContentSafe(originalContent) || 
         !ContentPolicy.isContentSafe(title)) {
+      _log('안전하지 않은 콘텐츠 감지됨');
       throw Exception('안전하지 않은 콘텐츠가 감지되었습니다. 다른 내용으로 작성해주세요.');
     }
 
@@ -157,6 +161,7 @@ class DiaryService {
     final filteredContent = ContentPolicy.filterPersonalInfo(originalContent);
     final filteredTitle = ContentPolicy.filterPersonalInfo(title);
 
+    // Edge Function 호출 (게스트 모드도 가능)
     try {
       _log('Edge Function 호출 시도', {
         'url': 'generate-diary',
@@ -168,6 +173,7 @@ class DiaryService {
         }
       });
       
+      // anon key로 Edge Function 호출 (게스트 모드도 가능)
       final response = await _supabase.functions.invoke(
         'generate-diary',
         body: {
@@ -175,6 +181,10 @@ class DiaryService {
           'content': originalContent,
           'style': style,
           'language': language,
+        },
+        headers: {
+          // 인증 헤더를 명시적으로 비워서 게스트도 사용 가능하게 함
+          'Authorization': 'Bearer ${Supabase.instance.client.auth.currentSession?.accessToken ?? _anonKey}',
         },
       );
 
@@ -189,12 +199,17 @@ class DiaryService {
         _log('AI 생성 성공');
         return response.data['generated_content'];
       } else {
-        throw Exception('AI 일기 생성 실패');
+        _log('AI 응답에 generated_content 없음');
+        throw Exception('AI 서버 응답 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
     } catch (e) {
-      _log('Edge Function 오류, Mock 데이터 사용', e.toString());
-      // Edge Function 실패 시 Mock 데이터 반환 (게스트 모드 지원)
-      return _generateMockDiary(title, originalContent, style, language);
+      _log('Edge Function 오류', e.toString());
+      // 네트워크 오류나 서버 오류만 표시
+      if (e.toString().contains('NetworkException')) {
+        throw Exception('네트워크 연결을 확인해주세요.');
+      } else {
+        throw Exception('AI 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
     }
   }
 

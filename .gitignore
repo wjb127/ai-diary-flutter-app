@@ -84,3 +84,8 @@ settings.json
 *.token
 *.secret
 .vercel
+
+# Test files with credentials
+test/auth_test.dart
+test/credentials_test.dart
+test/*_credentials.dart
