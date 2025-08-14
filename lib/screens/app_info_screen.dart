@@ -116,11 +116,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             
             const SizedBox(height: 24),
 
-            // 기술 스택 섹션
-            _buildTechStackSection(),
-            
-            const SizedBox(height: 24),
-
             // 링크 섹션
             _buildLinksSection(),
             
@@ -128,7 +123,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
             // 저작권 정보
             const Text(
-              '© 2025 AI 일기장\nMade with ❤️ using Flutter, Supabase & Claude AI',
+              '© 2025 AI 일기장\nMade with ❤️',
               style: TextStyle(
                 fontSize: 12,
                 color: Color(0xFF64748B),
@@ -187,56 +182,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
     );
   }
 
-  Widget _buildTechStackSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '기술 스택',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildTechTile(
-            icon: '🚀',
-            title: 'Flutter',
-            description: '크로스 플랫폼 모바일 앱 프레임워크',
-          ),
-          _buildTechTile(
-            icon: '⚡',
-            title: 'Supabase',
-            description: '오픈소스 Firebase 대안',
-          ),
-          _buildTechTile(
-            icon: '🤖',
-            title: 'Claude AI',
-            description: 'Anthropic의 대화형 AI 모델',
-          ),
-          _buildTechTile(
-            icon: '💰',
-            title: 'RevenueCat',
-            description: '구독 관리 플랫폼',
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildLinksSection() {
     return Container(
@@ -306,49 +251,6 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF64748B),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTechTile({
-    required String icon,
-    required String title,
-    required String description,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            icon,
-            style: const TextStyle(fontSize: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-              ],
             ),
           ),
         ],

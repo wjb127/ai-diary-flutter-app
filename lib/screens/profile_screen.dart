@@ -265,6 +265,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSubscriptionSection(AppLocalizations localizations) {
+    final user = _authService.currentUser;
+    final isGuest = user?.id == 'guest-user-id';
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -296,12 +299,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: _subscriptionService.isPremium ? '구독 중' : '무제한 일기 작성',
             onTap: () => context.push('/subscription'),
           ),
-          _buildMenuTile(
-            icon: Icons.restore,
-            title: '구매 복원',
-            subtitle: '이전 구매 내역 복원',
-            onTap: _restorePurchases,
-          ),
+          // 게스트가 아닐 때만 구매 복원 버튼 표시
+          if (!isGuest)
+            _buildMenuTile(
+              icon: Icons.restore,
+              title: '구매 복원',
+              subtitle: '이전 구매 내역 복원',
+              onTap: _restorePurchases,
+            ),
         ],
       ),
     );
