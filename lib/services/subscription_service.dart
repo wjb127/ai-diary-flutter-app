@@ -3,7 +3,7 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'auth_service.dart';
 
-class SubscriptionService {
+class SubscriptionService extends ChangeNotifier {
   static const String _revenueCatApiKey = String.fromEnvironment('REVENUECAT_API_KEY');
   static const String _entitlementId = 'premium';
   
@@ -83,6 +83,7 @@ class SubscriptionService {
   Future<void> refreshCustomerInfo() async {
     try {
       _customerInfo = await Purchases.getCustomerInfo();
+      notifyListeners();
       _log('구독 정보 갱신', isPremium ? '프리미엄' : '무료');
     } catch (e) {
       _log('구독 정보 갱신 실패', e.toString());
@@ -140,6 +141,7 @@ class SubscriptionService {
       final purchaseResult = await Purchases.purchaseStoreProduct(product);
       
       _customerInfo = purchaseResult;
+      notifyListeners();
       
       final success = _customerInfo?.entitlements.all[_entitlementId]?.isActive ?? false;
       _log('구매 결과', success ? '성공' : '실패');
@@ -161,6 +163,7 @@ class SubscriptionService {
     try {
       _log('구매 복원 시도');
       _customerInfo = await Purchases.restorePurchases();
+      notifyListeners();
       
       final success = isPremium;
       _log('구매 복원 결과', success ? '프리미엄 복원됨' : '복원할 구매 없음');
