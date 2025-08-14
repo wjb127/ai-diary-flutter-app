@@ -32,6 +32,10 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
+  // Language helpers
+  bool get isKorean => languageCode == 'ko';
+  bool get isEnglish => languageCode == 'en';
+
   // 홈 화면 번역
   String get greeting => languageCode == 'ko' ? '안녕하세요! 👋' : 'Hello! 👋';
   String get subtitle => languageCode == 'ko' 

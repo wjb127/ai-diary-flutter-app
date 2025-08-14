@@ -12,10 +12,9 @@ import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth_screen.dart';
-import 'screens/admin/admin_dashboard_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
-import 'services/local_subscription_service.dart';
+import 'services/subscription_service.dart';
 import 'widgets/responsive_wrapper.dart';
 
 const String kSupabaseUrl = String.fromEnvironment(
@@ -50,7 +49,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => LocalizationService()),
-        ChangeNotifierProvider(create: (context) => LocalSubscriptionService()),
+        ChangeNotifierProvider(create: (context) => SubscriptionService(AuthService())),
       ],
       child: MyApp(),
     ),
@@ -101,11 +100,6 @@ final _router = GoRouter(
           builder: (context, state) => const SubscriptionScreen(),
         ),
       ],
-    ),
-    GoRoute(
-      path: '/admin',
-      name: 'admin',
-      builder: (context, state) => const AdminDashboardScreen(),
     ),
   ],
 );

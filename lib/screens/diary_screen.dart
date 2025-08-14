@@ -746,19 +746,19 @@ $_generatedDiary
 
 ✨ Created with AI Diary App''';
 
-      final result = await Share.shareWithResult(
+      await Share.share(
         shareText,
         subject: title,
       );
 
-      // 공유 결과에 따른 피드백 (선택적)
-      if (result.status == ShareResultStatus.success && mounted) {
+      // 공유 완료 메시지
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               localizationService.isKorean 
-                  ? '✅ 공유되었습니다' 
-                  : '✅ Shared successfully'
+                  ? '✅ 공유 준비 완료' 
+                  : '✅ Ready to share'
             ),
             backgroundColor: const Color(0xFF10B981),
             duration: const Duration(seconds: 2),
