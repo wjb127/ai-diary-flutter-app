@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import '../services/localization_service.dart';
@@ -293,7 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.star_outline,
             title: '프리미엄 구독',
             subtitle: _subscriptionService.isPremium ? '구독 중' : '무제한 일기 작성',
-            onTap: () => Navigator.pushNamed(context, '/subscription'),
+            onTap: () => context.push('/subscription'),
           ),
           _buildMenuTile(
             icon: Icons.restore,
@@ -423,7 +424,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.dashboard,
             title: '관리자 대시보드',
             subtitle: '사용자 통계 및 분석',
-            onTap: () => Navigator.pushNamed(context, '/admin'),
+            onTap: () => context.push('/admin'),
           ),
         ],
       ),

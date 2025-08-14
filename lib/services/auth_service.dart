@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -133,20 +134,49 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // 구글 로그인 (Supabase OAuth)
+  // 구글 로그인
   Future<void> signInWithGoogle() async {
-    _log('구글 로그인 시도 (Supabase OAuth)');
+    _log('구글 로그인 시도');
     
     try {
-      await _supabase.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: kIsWeb 
-            ? null 
-            : 'com.aidiary.app://login-callback/',
-        authScreenLaunchMode: LaunchMode.externalApplication,
-      );
+      if (kIsWeb) {
+        // 웹에서는 Supabase OAuth 사용
+        await _supabase.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: 'https://ai-diary-flutter-app.vercel.app/auth/callback',
+        );
+      } else {
+        // 모바일에서는 Google Sign In 패키지 사용
+        const webClientId = '346893303844-4q5hgr7c4lcvb09k4tqsjq8rtpu1jtqi.apps.googleusercontent.com';
+        
+        final GoogleSignIn googleSignIn = GoogleSignIn(
+          clientId: kIsWeb ? webClientId : null,
+          serverClientId: webClientId,
+        );
+        
+        final googleUser = await googleSignIn.signIn();
+        if (googleUser == null) {
+          throw Exception('구글 로그인 취소됨');
+        }
+        
+        final googleAuth = await googleUser.authentication;
+        final accessToken = googleAuth.accessToken;
+        final idToken = googleAuth.idToken;
+        
+        if (accessToken == null || idToken == null) {
+          throw Exception('구글 인증 토큰을 가져올 수 없습니다');
+        }
+        
+        await _supabase.auth.signInWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: idToken,
+          accessToken: accessToken,
+        );
+      }
       
+      _isGuestMode = false;
       _log('구글 로그인 성공');
+      notifyListeners();
     } catch (e) {
       _log('구글 로그인 실패', e.toString());
       throw Exception('구글 로그인 실패: $e');
@@ -175,7 +205,9 @@ class AuthService extends ChangeNotifier {
         idToken: idToken,
       );
 
+      _isGuestMode = false;
       _log('애플 로그인 성공');
+      notifyListeners();
     } catch (e) {
       _log('애플 로그인 실패', e.toString());
       throw Exception('애플 로그인 실패: $e');
