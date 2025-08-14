@@ -255,7 +255,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          '계정 관리',
+          'AI 감성 일기',
           style: TextStyle(
             color: Color(0xFF1E293B),
             fontWeight: FontWeight.bold,
@@ -271,17 +271,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 간단한 제목만 (아이콘 제거, 위치를 위로)
-                  const SizedBox(height: 40),
-                  const Text(
-                    'AI 일기장',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  // 간단한 설명 문구만
+                  const SizedBox(height: 20),
                   const Text(
                     '당신의 일상을 아름답게 기록하세요',
                     style: TextStyle(
@@ -289,7 +280,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       color: Color(0xFF64748B),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                 
                 // Tab Bar
                 Container(
@@ -324,9 +315,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 ),
                   const SizedBox(height: 32),
                 
-                  // Tab Views - 고정 높이로 변경하여 키보드 대응 개선
-                  SizedBox(
-                    height: 400,
+                  // Tab Views - 키보드 대응을 위해 유연한 높이 사용
+                  Flexible(
                     child: TabBarView(
                       controller: _tabController,
                       children: [
@@ -337,7 +327,6 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
