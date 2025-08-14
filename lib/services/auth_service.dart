@@ -147,11 +147,10 @@ class AuthService extends ChangeNotifier {
         );
       } else {
         // 모바일에서는 Google Sign In 패키지 사용
-        const webClientId = '346893303844-4q5hgr7c4lcvb09k4tqsjq8rtpu1jtqi.apps.googleusercontent.com';
-        
+        // iOS에서는 GoogleService-Info.plist 사용
+        // Android에서는 google-services.json 사용
         final GoogleSignIn googleSignIn = GoogleSignIn(
-          clientId: kIsWeb ? webClientId : null,
-          serverClientId: webClientId,
+          scopes: ['email', 'profile'],
         );
         
         final googleUser = await googleSignIn.signIn();
