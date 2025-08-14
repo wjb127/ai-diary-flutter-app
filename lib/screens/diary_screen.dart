@@ -27,6 +27,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
   String? _generatedDiary;
   DiaryEntry? _existingDiary;
   bool _showCalendar = false; // 달력 표시 여부
+  bool _isTodayDiaryExpanded = true; // 오늘의 일기 펼침/접힘 상태
+  bool _isGeneratedDiaryExpanded = false; // AI 각색 일기 펼침/접힘 상태 (기본: 접힘)
   
   // 문체 선택 관련
   String _selectedStyle = 'emotional'; // 기본값: 감성적
@@ -273,15 +275,37 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        localizations.diaryTitle,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
+                      // 제목과 접기 버튼을 Row로 배치
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            localizations.diaryTitle,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E293B),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _isTodayDiaryExpanded = !_isTodayDiaryExpanded;
+                              });
+                            },
+                            icon: Icon(
+                              _isTodayDiaryExpanded 
+                                ? Icons.keyboard_arrow_up 
+                                : Icons.keyboard_arrow_down,
+                              color: const Color(0xFF6366F1),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8), // 16->8로 축소
+                      
+                      // 펼침/접힘 애니메이션
+                      if (_isTodayDiaryExpanded) ...[
+                        const SizedBox(height: 8), // 16->8로 축소
                       
                       // 제목 입력
                       TextField(
@@ -420,6 +444,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                 ),
                         ),
                       ),
+                      ], // if (_isTodayDiaryExpanded) 닫기
                     ],
                   ),
                 ),
@@ -435,47 +460,70 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Icon(
-                              Icons.auto_awesome,
-                              color: Color(0xFF6366F1),
-                              size: 24,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.auto_awesome,
+                                    color: Color(0xFF6366F1),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    localizations.aiEnhancedTitle,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              localizations.aiEnhancedTitle,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E293B),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isGeneratedDiaryExpanded = !_isGeneratedDiaryExpanded;
+                                });
+                              },
+                              icon: Icon(
+                                _isGeneratedDiaryExpanded 
+                                  ? Icons.keyboard_arrow_up 
+                                  : Icons.keyboard_arrow_down,
+                                color: const Color(0xFF6366F1),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF6366F1).withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Text(
-                            _generatedDiary!,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              height: 1.6,
-                              color: Color(0xFF1E293B),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
                         
-                        // 복사 및 공유 버튼들
-                        Row(
+                        // AI 일기 내용을 펼침/접힘
+                        if (_isGeneratedDiaryExpanded) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Text(
+                              _generatedDiary!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 1.6,
+                                color: Color(0xFF1E293B),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        
+                          // 복사 및 공유 버튼들
+                          Row(
                           children: [
                             Expanded(
                               child: OutlinedButton.icon(
@@ -535,11 +583,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ], // if (_isGeneratedDiaryExpanded) 닫기
+                    ],
                   ),
                 ),
-              ],
+              ),
+            ],
               
               const SizedBox(height: 40),
                 ],
