@@ -19,13 +19,15 @@ import 'services/localization_service.dart';
 import 'services/analytics_service.dart';
 import 'widgets/responsive_wrapper.dart';
 
+// 환경변수로 설정 필요 (--dart-define 사용)
+// 또는 .env 파일 참조 (flutter_dotenv 패키지 필요)
 const String kSupabaseUrl = String.fromEnvironment(
   'SUPABASE_URL',
-  defaultValue: 'https://example.supabase.co',
+  defaultValue: '', // 빌드 시 --dart-define으로 설정
 );
 const String kSupabaseAnonKey = String.fromEnvironment(
   'SUPABASE_ANON_KEY',
-  defaultValue: 'public-anon-key-placeholder',
+  defaultValue: '', // 빌드 시 --dart-define으로 설정
 );
 
 void main() async {
