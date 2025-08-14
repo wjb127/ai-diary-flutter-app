@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -29,6 +30,9 @@ const String kSupabaseAnonKey = String.fromEnvironment(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // URL 전략 설정 (# 제거)
+  setUrlStrategy(PathUrlStrategy());
   
   // 한국어 날짜 포맷 초기화
   await initializeDateFormatting('ko_KR', null);
@@ -78,6 +82,13 @@ final _router = GoRouter(
         child: AuthScreen(),
       ),
     ),
+    GoRoute(
+      path: '/admin',
+      name: 'admin',
+      builder: (context, state) => const ResponsiveWrapper(
+        child: AdminScreen(),
+      ),
+    ),
     ShellRoute(
       builder: (context, state, child) => ResponsiveWrapper(
         child: MainScreen(child: child),
@@ -102,11 +113,6 @@ final _router = GoRouter(
           path: '/subscription',
           name: 'subscription',
           builder: (context, state) => const SubscriptionScreen(),
-        ),
-        GoRoute(
-          path: '/admin',
-          name: 'admin',
-          builder: (context, state) => const AdminScreen(),
         ),
       ],
     ),
