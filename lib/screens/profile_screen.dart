@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
@@ -181,6 +182,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // 계정 관리
               _buildAccountSection(isGuest, localizations),
+
+              // 웹에서만 관리자 대시보드 링크 표시
+              if (kIsWeb) ...[
+                const SizedBox(height: 16),
+                _buildAdminSection(),
+              ],
 
               const SizedBox(height: 24),
 
@@ -378,6 +385,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: Color(0xFF64748B),
       ),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildAdminSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.deepPurple.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.admin_panel_settings,
+                color: Colors.deepPurple,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                '관리자 메뉴',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildMenuTile(
+            icon: Icons.dashboard,
+            title: '관리자 대시보드',
+            subtitle: '사용자 통계 및 분석',
+            onTap: () => Navigator.pushNamed(context, '/admin'),
+          ),
+        ],
+      ),
     );
   }
 

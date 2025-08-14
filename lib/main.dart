@@ -12,8 +12,10 @@ import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/admin_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
+import 'services/analytics_service.dart';
 import 'widgets/responsive_wrapper.dart';
 
 const String kSupabaseUrl = String.fromEnvironment(
@@ -43,6 +45,10 @@ void main() async {
   
   // 게스트 모드로 자동 시작
   _authService.signInAsGuest();
+  
+  // Analytics 서비스 초기화
+  final analytics = AnalyticsService();
+  analytics.startSession();
   
   runApp(
     MultiProvider(
@@ -96,6 +102,11 @@ final _router = GoRouter(
           path: '/subscription',
           name: 'subscription',
           builder: (context, state) => const SubscriptionScreen(),
+        ),
+        GoRoute(
+          path: '/admin',
+          name: 'admin',
+          builder: (context, state) => const AdminScreen(),
         ),
       ],
     ),

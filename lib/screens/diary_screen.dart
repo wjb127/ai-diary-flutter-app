@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/diary_service.dart';
 import '../services/localization_service.dart';
+import '../services/analytics_service.dart';
 import '../models/diary_model.dart';
 
 class DiaryScreen extends StatefulWidget {
@@ -21,6 +22,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final DiaryService _diaryService = DiaryService();
+  final AnalyticsService _analytics = AnalyticsService();
   bool _isLoading = false;
   String? _generatedDiary;
   DiaryEntry? _existingDiary;

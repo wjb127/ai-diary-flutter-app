@@ -75,3 +75,4 @@ settings.json
 # Database and API credentials
 *.token
 *.secret
+.vercel
