@@ -14,6 +14,7 @@ import 'screens/subscription_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/admin_screen.dart';
+import 'screens/ai_disclaimer_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
 import 'services/analytics_service.dart';

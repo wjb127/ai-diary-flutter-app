@@ -293,10 +293,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          // 구독 서비스 준비 중 표시
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFFCD34D),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: const [
+                Icon(
+                  Icons.construction,
+                  color: Color(0xFFF59E0B),
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '구독 서비스 준비 중',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '현재 하루 10회 무료로 이용 가능합니다',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF92400E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           _buildMenuTile(
             icon: Icons.star_outline,
-            title: '프리미엄 구독',
-            subtitle: _subscriptionService.isPremium ? '구독 중' : '무제한 일기 작성',
+            title: '프리미엄 구독 (준비 중)',
+            subtitle: '무제한 일기 작성',
             onTap: () => context.push('/subscription'),
           ),
           // 게스트가 아닐 때만 구매 복원 버튼 표시

@@ -9,6 +9,7 @@ import '../services/diary_service.dart';
 import '../services/localization_service.dart';
 import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
+import '../services/usage_limit_service.dart';
 import '../models/diary_model.dart';
 
 class DiaryScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   final TextEditingController _contentController = TextEditingController();
   final DiaryService _diaryService = DiaryService();
   final AnalyticsService _analytics = AnalyticsService();
+  final UsageLimitService _usageLimitService = UsageLimitService();
   bool _isLoading = false;
   String? _generatedDiary;
   DiaryEntry? _existingDiary;
@@ -395,6 +397,54 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       
                       const SizedBox(height: 6), // 12->6으로 축소
                       
+                      // 사용 횟수 표시
+                      AnimatedBuilder(
+                        animation: _usageLimitService,
+                        builder: (context, child) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _usageLimitService.hasReachedLimit 
+                                  ? const Color(0xFFFEE2E2)
+                                  : const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: _usageLimitService.hasReachedLimit 
+                                    ? const Color(0xFFFCA5A5)
+                                    : const Color(0xFFDDD6FE),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.auto_awesome,
+                                  size: 16,
+                                  color: _usageLimitService.hasReachedLimit 
+                                      ? const Color(0xFFEF4444)
+                                      : const Color(0xFF6366F1),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  localizationService.isKorean
+                                      ? 'AI 생성 콘텐츠 | 오늘 ${_usageLimitService.usageCount}/10회 사용'
+                                      : 'AI Generated | Used ${_usageLimitService.usageCount}/10 today',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: _usageLimitService.hasReachedLimit 
+                                        ? const Color(0xFFEF4444)
+                                        : const Color(0xFF6366F1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      
                       // AI 각색 버튼
                       SizedBox(
                         width: double.infinity,
@@ -645,6 +695,35 @@ class _DiaryScreenState extends State<DiaryScreen> {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     final localizations = AppLocalizations(localizationService.currentLanguage);
     
+    // 사용 제한 체크
+    if (!await _usageLimitService.canUseFeature()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizationService.isKorean 
+                ? '일일 사용 한도(10회)를 초과했습니다. 내일 다시 시도해주세요.' 
+                : 'Daily limit (10 times) exceeded. Please try again tomorrow.',
+          ),
+          backgroundColor: Colors.orange,
+          action: SnackBarAction(
+            label: localizationService.isKorean ? '구독 안내' : 'Subscribe',
+            textColor: Colors.white,
+            onPressed: () {
+              // 구독 화면으로 이동
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('구독 서비스는 준비 중입니다'),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+    
     if (_titleController.text.trim().isEmpty || _contentController.text.trim().isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -661,6 +740,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
     });
 
     try {
+      // 사용 횟수 증가
+      await _usageLimitService.incrementUsage();
       // 사용자가 입력한 언어를 감지하여 AI 프롬프트 언어 결정
       final isKoreanInput = _isKoreanText(_titleController.text + ' ' + _contentController.text);
       final aiLanguage = isKoreanInput ? 'ko' : 'en';
