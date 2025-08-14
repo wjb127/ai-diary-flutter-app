@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/diary_model.dart';
+import '../utils/content_policy.dart';
 
 class DiaryService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -146,6 +147,16 @@ class DiaryService {
       'language': language,
     });
 
+    // AI 콘텐츠 정책: 안전성 검사
+    if (!ContentPolicy.isContentSafe(originalContent) || 
+        !ContentPolicy.isContentSafe(title)) {
+      throw Exception('안전하지 않은 콘텐츠가 감지되었습니다. 다른 내용으로 작성해주세요.');
+    }
+
+    // 개인정보 필터링
+    final filteredContent = ContentPolicy.filterPersonalInfo(originalContent);
+    final filteredTitle = ContentPolicy.filterPersonalInfo(title);
+
     try {
       _log('Edge Function 호출 시도');
       
@@ -222,7 +233,7 @@ $originalContent
 PS. 미래의 나야, 이거 읽고 웃지 마라. 아 참고로 복근 생겼니?""";
         
       default:
-        return """오늘은 정말 특별한 하루였다. $title
+        final content = """오늘은 정말 특별한 하루였다. $title
 
 $originalContent
 
@@ -230,9 +241,9 @@ $originalContent
 
 평범해 보이는 하루일지라도, 그 안에는 수많은 감정과 경험들이 녹아있다. 때로는 힘들고 지칠 때도 있지만, 그런 순간들마저도 나를 성장시키는 소중한 밑거름이 된다.
 
-오늘의 나에게 고맙다. 내일의 나도 기대된다. ✨
-
-- AI가 당신의 일상을 아름답게 각색했습니다 -""";
+오늘의 나에게 고맙다. 내일의 나도 기대된다. ✨""";
+        // AI 콘텐츠 워터마크 추가
+        return ContentPolicy.addAIWatermark(content);
     }
   }
 

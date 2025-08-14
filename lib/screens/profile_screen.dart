@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import '../services/localization_service.dart';
+import '../utils/content_policy.dart';
 import 'auth_screen.dart';
 import 'app_info_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
