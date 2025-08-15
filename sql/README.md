@@ -62,3 +62,14 @@ WHERE table_schema = 'public' AND table_name = 'diary_entries';
 SELECT relname, relrowsecurity FROM pg_class 
 WHERE relname = 'diary_entries';
 ```
+
+📞 전화번호
+
+  - 대표번호 & 창업문의: 1577-6615
+
+  🏢 기업 정보
+
+  - 사업자번호: 754-88-01536
+  - 대표: 유지원
+  - 주소: 대구광역시 수성구 청수로9길 39, 1층(중동)
+  - 회사명: 황금쭈꾸미집

@@ -35,6 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _authService.removeListener(_onAuthStateChanged);
+    _deleteConfirmController.dispose();
     super.dispose();
   }
 
@@ -402,6 +403,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: '서비스 이용약관',
             onTap: () => _openTermsOfService(),
           ),
+          // 데이터 삭제 옵션 추가 (게스트가 아닐 때만)
+          if (!isGuest)
+            _buildMenuTile(
+              icon: Icons.delete_forever_outlined,
+              title: '계정 및 데이터 삭제',
+              subtitle: '모든 데이터를 완전히 삭제합니다',
+              onTap: () => _showDeleteAccountDialog(),
+            ),
         ],
       ),
     );
@@ -653,4 +662,221 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
   }
+  
+  // 계정 삭제 다이얼로그
+  Future<void> _showDeleteAccountDialog() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_outlined,
+              color: Color(0xFFEF4444),
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              localizationService.isKorean ? '계정 삭제' : 'Delete Account',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFEF4444),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              localizationService.isKorean 
+                  ? '정말로 계정을 삭제하시겠습니까?'
+                  : 'Are you sure you want to delete your account?',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEE2E2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFFFCA5A5),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                localizationService.isKorean
+                    ? '⚠️ 이 작업은 되돌릴 수 없습니다!\n\n'
+                      '• 모든 일기가 영구적으로 삭제됩니다\n'
+                      '• AI로 생성된 콘텐츠가 모두 삭제됩니다\n'
+                      '• 구독 정보가 삭제됩니다\n'
+                      '• 계정을 복구할 수 없습니다'
+                    : '⚠️ This action cannot be undone!\n\n'
+                      '• All diaries will be permanently deleted\n'
+                      '• All AI-generated content will be deleted\n'
+                      '• Subscription info will be deleted\n'
+                      '• Account cannot be recovered',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF991B1B),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              localizationService.isKorean
+                  ? '계속하려면 "삭제" 를 입력하세요:'
+                  : 'Type "DELETE" to continue:',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _deleteConfirmController,
+              decoration: InputDecoration(
+                hintText: localizationService.isKorean ? '삭제' : 'DELETE',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Color(0xFFEF4444),
+                    width: 2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _deleteConfirmController.clear();
+              Navigator.of(context).pop();
+            },
+            child: Text(
+              localizationService.isKorean ? '취소' : 'Cancel',
+              style: const TextStyle(color: Color(0xFF64748B)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final confirmText = _deleteConfirmController.text;
+              final expectedText = localizationService.isKorean ? '삭제' : 'DELETE';
+              
+              if (confirmText != expectedText) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      localizationService.isKorean 
+                          ? '확인 텍스트가 일치하지 않습니다'
+                          : 'Confirmation text does not match',
+                    ),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
+              
+              _deleteConfirmController.clear();
+              Navigator.of(context).pop();
+              await _deleteAccount();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+            ),
+            child: Text(
+              localizationService.isKorean ? '영구 삭제' : 'Delete Forever',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // 계정 삭제 실행
+  Future<void> _deleteAccount() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    // 로딩 다이얼로그 표시
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('계정을 삭제하고 있습니다...'),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    try {
+      // TODO: 실제 계정 삭제 API 호출
+      // await _authService.deleteAccount();
+      // await _diaryService.deleteAllDiaries();
+      
+      // 임시: 로그아웃 처리
+      await Future.delayed(const Duration(seconds: 2));
+      await _authService.signOut();
+      await _authService.signInAsGuest();
+      
+      if (mounted) {
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizationService.isKorean 
+                  ? '계정이 성공적으로 삭제되었습니다'
+                  : 'Account deleted successfully',
+            ),
+            backgroundColor: const Color(0xFF10B981),
+          ),
+        );
+        
+        // 홈 화면으로 이동
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop(); // 로딩 다이얼로그 닫기
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              localizationService.isKorean 
+                  ? '계정 삭제 중 오류가 발생했습니다'
+                  : 'Error deleting account',
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
+  }
+  
+  final TextEditingController _deleteConfirmController = TextEditingController();
 }

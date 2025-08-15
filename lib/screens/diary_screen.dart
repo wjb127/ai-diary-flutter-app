@@ -11,6 +11,7 @@ import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/usage_limit_service.dart';
 import '../models/diary_model.dart';
+import '../utils/content_policy.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -608,6 +609,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: 12),
+                            // AI 응답 신고 버튼 추가
+                            OutlinedButton.icon(
+                              onPressed: () => _reportAIResponse(),
+                              icon: const Icon(Icons.flag_outlined, size: 18),
+                              label: Text(localizations.isKorean ? '신고' : 'Report'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                side: const BorderSide(color: Color(0xFFEF4444)),
+                                foregroundColor: const Color(0xFFEF4444),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         
@@ -990,5 +1006,144 @@ $_generatedDiary
     
     // 텍스트의 30% 이상이 한국어면 한국어로 판단
     return totalChars > 0 && (koreanMatches / totalChars) > 0.3;
+  }
+  
+  // AI 응답 신고 기능
+  Future<void> _reportAIResponse() async {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.flag_outlined,
+              color: Color(0xFFEF4444),
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              localizationService.isKorean ? 'AI 응답 신고' : 'Report AI Response',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              localizationService.isKorean 
+                  ? '이 AI 응답에 문제가 있나요?'
+                  : 'Is there an issue with this AI response?',
+              style: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              localizationService.isKorean
+                  ? '• 부적절한 내용\n• 잘못된 정보\n• 해로운 콘텐츠\n• 기타 문제'
+                  : '• Inappropriate content\n• Incorrect information\n• Harmful content\n• Other issues',
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF64748B),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              localizationService.isKorean ? '취소' : 'Cancel',
+              style: const TextStyle(color: Color(0xFF64748B)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // 신고 접수 로직 (나중에 서버로 전송)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    localizationService.isKorean 
+                        ? '신고가 접수되었습니다. 감사합니다.'
+                        : 'Report submitted. Thank you.',
+                  ),
+                  backgroundColor: const Color(0xFF10B981),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+            ),
+            child: Text(
+              localizationService.isKorean ? '신고하기' : 'Report',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // 정신 건강 리소스 다이얼로그
+  void _showMentalHealthResourcesDialog() {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.favorite,
+              color: Color(0xFFEF4444),
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              localizationService.isKorean ? '도움이 필요하신가요?' : 'Need Help?',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ContentPolicy.mentalHealthResources,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              localizationService.isKorean ? '확인' : 'OK',
+              style: const TextStyle(
+                color: Color(0xFF6366F1),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

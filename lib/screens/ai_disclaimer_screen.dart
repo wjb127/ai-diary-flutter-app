@@ -142,6 +142,58 @@ class AIDisclaimerScreen extends StatelessWidget {
                       
                       const SizedBox(height: 20),
                       
+                      // 의료 목적 아님 면책조항 (강조)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFFFCA5A5),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.warning_amber_outlined,
+                                  color: Color(0xFFEF4444),
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  '중요 안내사항',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF991B1B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              '이 앱은 의료 목적이 아닙니다',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF991B1B),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            _buildBulletPoint('개인 일기 작성 및 감정 기록용 앱입니다', Colors.red),
+                            _buildBulletPoint('정신 건강 치료나 상담을 대체할 수 없습니다', Colors.red),
+                            _buildBulletPoint('의료적 조언이나 진단을 제공하지 않습니다', Colors.red),
+                            _buildBulletPoint('심각한 정신 건강 문제는 전문가와 상담하세요', Colors.red),
+                          ],
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 20),
+                      
                       // 책임 제한
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -222,26 +274,27 @@ class AIDisclaimerScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildBulletPoint(String text) {
+  Widget _buildBulletPoint(String text, [Color? color]) {
+    final textColor = color ?? const Color(0xFF475569);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             '•',
             style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF475569),
+              color: textColor,
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF475569),
+                color: textColor,
                 height: 1.4,
               ),
             ),
