@@ -51,14 +51,17 @@ apple-app-site-association
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-# /build/  # Vercel 배포를 위해 주석 처리
-/build/app/
-/build/ios/
-/build/macos/
-/build/linux/
-/build/windows/
-/build/android/
-# /build/web/  # Web 빌드는 커밋에 포함
+/build/
+# Vercel 배포를 위해 web 빌드만 예외 처리
+!/build/web/
+
+# Build cache files
+*.cache.dill.track.dill
+*.dill
+/build/cache.dill.track.dill
+/build/test_cache/
+/build/unit_test_assets/
+/build/native_assets/
 
 # Symbolication related
 app.*.symbols
