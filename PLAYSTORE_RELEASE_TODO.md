@@ -11,23 +11,22 @@
 ```bash
 keytool -genkey -v -keystore ~/aidiary-release.keystore -alias aidiary -keyalg RSA -keysize 2048 -validity 10000
 ```
-- [ ] keystore 파일 생성
-- [ ] 비밀번호 안전한 곳에 저장
-- [ ] `android/key.properties` 파일 생성
-- [ ] `.gitignore`에 key.properties 추가
-- [ ] keystore 파일 백업 (Google Drive, USB 등)
+- [x] keystore 파일 생성 ✅
+- [x] 비밀번호 안전한 곳에 저장 ✅ 
+- [x] `android/key.properties` 파일 생성 ✅
+- [x] `.gitignore`에 key.properties 추가 ✅
+- [ ] ⚠️ **keystore 파일 백업 필수** (Google Drive, USB 등)
 
 **⚠️ 주의: 이 키를 잃어버리면 앱 업데이트 불가능**
 
 ### 2. 패키지명 변경 ⚠️ **변경 불가**
-현재: `com.test.aidiary`
-변경: `com.[회사명].aidiary` (예: `com.mindflow.aidiary`)
+~~현재: `com.test.aidiary`~~
+**변경됨**: `com.aidiary.app` ✅
 
 변경 파일:
-- [ ] `android/app/build.gradle`
-- [ ] `android/app/src/main/AndroidManifest.xml`
-- [ ] `android/app/src/debug/AndroidManifest.xml`
-- [ ] `android/app/src/profile/AndroidManifest.xml`
+- [x] `android/app/build.gradle` ✅
+- [x] `android/app/google-services.json` ✅
+- [x] `android/app/src/main/AndroidManifest.xml` ✅
 - [ ] iOS Bundle Identifier (iOS 출시 시)
 
 ---
@@ -37,36 +36,37 @@ keytool -genkey -v -keystore ~/aidiary-release.keystore -alias aidiary -keyalg R
 ### 3. 버전 설정
 `pubspec.yaml`:
 ```yaml
-version: 1.0.0+1  # 현재
-version: 1.0.0+2  # 출시 버전 (권장)
+version: 1.0.0+1  # 이전
+version: 1.0.0+2  # 현재 설정됨 ✅
 ```
-- [ ] 버전 번호 결정
-- [ ] 빌드 번호 증가
+- [x] 버전 번호 결정 ✅
+- [x] 빌드 번호 증가 ✅
 
 ### 4. ProGuard 설정
 `android/app/proguard-rules.pro`:
-- [ ] Supabase 관련 규칙 추가
-- [ ] Google Sign-In 규칙 추가
-- [ ] 난독화 예외 설정
+- [x] Supabase 관련 규칙 추가 ✅
+- [x] Google Sign-In 규칙 추가 ✅
+- [x] Play Core 라이브러리 규칙 추가 ✅
+- [x] 난독화 예외 설정 ✅
 
 ### 5. 앱 번들 빌드
 ```bash
 flutter build appbundle --release
 ```
-- [ ] .aab 파일 생성 (APK보다 권장)
-- [ ] 파일 크기 확인 (150MB 제한)
+- [x] .aab 파일 생성 ✅ (26.2MB)
+- [x] 파일 크기 확인 ✅ (150MB 제한 내)
 
 ---
 
 ## 🟢 스토어 등록 정보 (D-5~6)
 
 ### 6. 앱 정보
-- [ ] **앱 이름**: AI 일기장 (30자 이내)
-- [ ] **짧은 설명** (80자):
+- [x] **앱 이름**: AI 일기장 ✅ (AndroidManifest.xml 설정됨)
+- [x] **짧은 설명** (80자): ✅ (store_description_ko.txt 준비됨)
   ```
-  AI가 당신의 일상을 아름답게 각색해주는 감성 일기장
+  AI가 당신의 일상을 아름답게 각색해주는 감성 일기장 - Claude AI 기반
   ```
-- [ ] **긴 설명** (4000자): 아래 템플릿 참고
+- [x] **긴 설명** (4000자): ✅ (store_description_ko.txt 준비됨)
 
 ### 7. 스크린샷 준비
 최소 2개, 권장 8개 (각 320~3840px)

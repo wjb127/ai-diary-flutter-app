@@ -88,3 +88,6 @@ settings.json
 *.secret
 .vercel
 .env.local
+
+# Keystore backup info (NEVER COMMIT)
+KEYSTORE_BACKUP_INFO.md

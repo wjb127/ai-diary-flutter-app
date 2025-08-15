@@ -1,0 +1,55 @@
+【 Short Description (80 chars) 】
+AI-powered diary that beautifully transforms your daily stories - Claude AI
+
+【 Full Description (4000 chars) 】
+✨ AI Diary - Make Your Story Special ✨
+
+Transform your ordinary day into beautiful prose with AI.
+Claude AI understands your emotions and recreates them literarily.
+
+🎯 Key Features
+
+【 AI Diary Enhancement 】
+• Transform simple notes into emotional essays
+• Claude AI's delicate emotion understanding
+• Korean/English support
+
+【 Secure Data Management 】
+• Automatic Supabase cloud backup
+• Safe sync with Google login
+• Complete deletion anytime
+
+【 Free to Use 】
+• 10 free AI enhancements daily
+• Unlimited diary storage
+• Clean, ad-free environment
+
+【 Mental Health Support 】
+• Automatic content filtering
+• Help resources provided
+• AI response reporting
+
+【 Main Features 】
+✓ Offline mode support
+✓ Dark mode
+✓ Calendar view
+✓ Diary sharing
+✓ Privacy protection
+
+⚠️ Important Notice
+• This app is not for medical purposes
+• AI-generated content is creative writing
+• Recommended for ages 13+
+
+📱 How to Use
+1. Write today's diary
+2. Click AI enhance button
+3. Save beautifully transformed diary
+
+💬 Contact & Feedback
+GitHub: https://github.com/wjb127/ai-diary-flutter-app
+
+Privacy Policy:
+https://raw.githubusercontent.com/wjb127/ai-diary-flutter-app/main/docs/privacy_policy.txt
+
+#AIDiary #DiaryApp #EmotionalDiary #ClaudeAI #Journal
