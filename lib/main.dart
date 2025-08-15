@@ -92,13 +92,6 @@ final _router = GoRouter(
         child: AdminScreen(),
       ),
     ),
-    GoRoute(
-      path: '/reset-password',
-      name: 'reset-password',
-      builder: (context, state) => const ResponsiveWrapper(
-        child: ResetPasswordScreen(),
-      ),
-    ),
     ShellRoute(
       builder: (context, state, child) => ResponsiveWrapper(
         child: MainScreen(child: child),

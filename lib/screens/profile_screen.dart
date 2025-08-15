@@ -6,7 +6,7 @@ import '../services/auth_service.dart';
 import '../services/subscription_service.dart';
 import '../services/localization_service.dart';
 import '../utils/content_policy.dart';
-import 'auth_screen.dart';
+import 'simple_auth_screen.dart';
 import 'app_info_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -507,7 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _navigateToAuth() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AuthScreen()),
+      MaterialPageRoute(builder: (context) => const SimpleAuthScreen()),
     );
   }
 

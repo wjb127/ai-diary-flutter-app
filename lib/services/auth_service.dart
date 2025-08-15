@@ -129,17 +129,6 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<void> resetPassword(String email) async {
-    try {
-      await _supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'https://ai-diary-flutter-app.vercel.app/reset-password',
-      );
-    } catch (e) {
-      throw Exception('비밀번호 재설정 실패: $e');
-    }
-  }
-
   // 구글 로그인
   Future<void> signInWithGoogle() async {
     _log('구글 로그인 시도');
