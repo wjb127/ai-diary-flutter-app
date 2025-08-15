@@ -34,24 +34,50 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   Future<void> _checkSession() async {
     try {
+      // 먼저 현재 세션 확인
       final session = Supabase.instance.client.auth.currentSession;
       if (session != null) {
         setState(() {
           _hasValidSession = true;
         });
-      } else {
-        // URL에서 토큰 파라미터 확인
-        final uri = Uri.base;
-        if (uri.fragment.contains('access_token')) {
-          // 토큰이 있으면 세션 복구 시도
-          setState(() {
-            _hasValidSession = true;
-          });
+        return;
+      }
+
+      // URL에서 recovery 토큰 확인 및 세션 복구
+      final uri = Uri.base;
+      if (uri.fragment.isNotEmpty) {
+        // Fragment를 파싱하여 파라미터 추출
+        final params = Uri.splitQueryString(uri.fragment);
+        
+        // recovery 타입인지 확인
+        if (params['type'] == 'recovery' && params['access_token'] != null) {
+          try {
+            // 세션 복구를 위해 getSessionFromUrl 호출
+            final response = await Supabase.instance.client.auth.getSessionFromUrl(uri);
+            
+            if (response.session != null) {
+              setState(() {
+                _hasValidSession = true;
+              });
+            } else {
+              setState(() {
+                _errorMessage = '세션 복구에 실패했습니다. 링크가 만료되었을 수 있습니다.';
+              });
+            }
+          } catch (e) {
+            setState(() {
+              _errorMessage = '세션 복구 중 오류: ${e.toString()}';
+            });
+          }
         } else {
           setState(() {
             _errorMessage = '유효하지 않은 재설정 링크입니다. 이메일에서 받은 링크를 다시 확인해주세요.';
           });
         }
+      } else {
+        setState(() {
+          _errorMessage = '비밀번호 재설정 링크가 필요합니다. 이메일에서 받은 링크를 통해 접속해주세요.';
+        });
       }
     } catch (e) {
       setState(() {
