@@ -16,12 +16,48 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _hasValidSession = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession();
+  }
 
   @override
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkSession() async {
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session != null) {
+        setState(() {
+          _hasValidSession = true;
+        });
+      } else {
+        // URL에서 토큰 파라미터 확인
+        final uri = Uri.base;
+        if (uri.fragment.contains('access_token')) {
+          // 토큰이 있으면 세션 복구 시도
+          setState(() {
+            _hasValidSession = true;
+          });
+        } else {
+          setState(() {
+            _errorMessage = '유효하지 않은 재설정 링크입니다. 이메일에서 받은 링크를 다시 확인해주세요.';
+          });
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = '세션 확인 중 오류가 발생했습니다: ${e.toString()}';
+      });
+    }
   }
 
   Future<void> _updatePassword() async {
@@ -70,7 +106,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Form(
+          child: _errorMessage != null
+              ? _buildErrorMessage()
+              : !_hasValidSession
+                  ? _buildLoadingIndicator()
+                  : Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,6 +241,80 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '오류',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.red[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              _errorMessage ?? '알 수 없는 오류가 발생했습니다.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Color(0xFF64748B),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () {
+              // 로그인 페이지로 이동
+              context.go('/auth');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              '로그인 페이지로 이동',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: Color(0xFF6366F1),
+          ),
+          SizedBox(height: 16),
+          Text(
+            '세션 확인 중...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Color(0xFF64748B),
+            ),
+          ),
+        ],
       ),
     );
   }
