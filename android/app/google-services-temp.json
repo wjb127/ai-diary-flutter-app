@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "903480708005",
+    "firebase_url": "https://ai-diary-313e5.firebaseio.com",
+    "project_id": "ai-diary-313e5",
+    "storage_bucket": "ai-diary-313e5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903480708005:android:826a135d8a972c76fdb64c",
+        "android_client_info": {
+          "package_name": "com.test.aidiary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "985326625841-7n40p2pq9bbp6r62ipqovq5robl39u7b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.test.aidiary",
+            "certificate_hash": "6595a95efb632c02d5b5692370930ac4d9c74dfa"
+          }
+        },
+        {
+          "client_id": "903480708005-PLACEHOLDER.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfcWrMAJ0WxjrwuvZNaXgTg_T9i4y4NcE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903480708005-PLACEHOLDER.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 import 'package:go_router/go_router.dart';
 import '../services/auth_service.dart';
 import '../screens/home_screen.dart';
@@ -241,6 +242,117 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  // 비밀번호 재설정 다이얼로그
+  void _showPasswordResetDialog() {
+    final TextEditingController resetEmailController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.lock_reset, color: Color(0xFF6366F1)),
+              SizedBox(width: 8),
+              Text('비밀번호 재설정'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '가입하신 이메일 주소를 입력하시면\n비밀번호 재설정 링크를 보내드립니다.',
+                style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: resetEmailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: '이메일',
+                  hintText: 'your@email.com',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                '취소',
+                style: TextStyle(color: Color(0xFF64748B)),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = resetEmailController.text.trim();
+                if (email.isEmpty || !email.contains('@')) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('올바른 이메일 주소를 입력해주세요'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  return;
+                }
+                
+                Navigator.of(context).pop();
+                
+                try {
+                  await _authService.resetPassword(email);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$email로 비밀번호 재설정 링크를 전송했습니다'),
+                        backgroundColor: const Color(0xFF10B981),
+                        duration: const Duration(seconds: 4),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('오류: ${e.toString().replaceAll('Exception: ', '')}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6366F1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                '전송',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -507,8 +619,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           
           const SizedBox(height: 12),
           
-          // 애플 로그인
-          SizedBox(
+          // 애플 로그인 (iOS에서만 표시)
+          if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS))
+            SizedBox(
               width: double.infinity,
               height: 52,
               child: OutlinedButton(
@@ -545,9 +658,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             const SizedBox(height: 24),
           
           TextButton(
-            onPressed: () {
-              // TODO: 비밀번호 재설정 기능
-            },
+            onPressed: _showPasswordResetDialog,
             child: const Text(
               '비밀번호를 잊으셨나요?',
               style: TextStyle(

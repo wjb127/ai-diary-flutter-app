@@ -84,3 +84,4 @@ settings.json
 *.token
 *.secret
 .vercel
+.env.local

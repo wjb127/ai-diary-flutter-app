@@ -15,6 +15,7 @@ import 'screens/splash_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/admin_screen.dart';
 import 'screens/ai_disclaimer_screen.dart';
+import 'screens/reset_password_screen.dart';
 import 'services/auth_service.dart';
 import 'services/localization_service.dart';
 import 'services/analytics_service.dart';
@@ -89,6 +90,13 @@ final _router = GoRouter(
       name: 'admin',
       builder: (context, state) => const ResponsiveWrapper(
         child: AdminScreen(),
+      ),
+    ),
+    GoRoute(
+      path: '/reset-password',
+      name: 'reset-password',
+      builder: (context, state) => const ResponsiveWrapper(
+        child: ResetPasswordScreen(),
       ),
     ),
     ShellRoute(
