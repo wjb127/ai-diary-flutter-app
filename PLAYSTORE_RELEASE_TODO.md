@@ -21,7 +21,7 @@ keytool -genkey -v -keystore ~/aidiary-release.keystore -alias aidiary -keyalg R
 
 ### 2. 패키지명 변경 ⚠️ **변경 불가**
 ~~현재: `com.test.aidiary`~~
-**변경됨**: `com.aidiary.app` ✅
+**변경됨**: `com.aigamsung.diary` ✅
 
 변경 파일:
 - [x] `android/app/build.gradle` ✅
@@ -61,7 +61,7 @@ flutter build appbundle --release
 ## 🟢 스토어 등록 정보 (D-5~6)
 
 ### 6. 앱 정보
-- [x] **앱 이름**: AI 일기장 ✅ (AndroidManifest.xml 설정됨)
+- [x] **앱 이름**: AI 감성 일기 ✅ (AndroidManifest.xml 설정됨)
 - [x] **짧은 설명** (80자): ✅ (store_description_ko.txt 준비됨)
   ```
   AI가 당신의 일상을 아름답게 각색해주는 감성 일기장 - Claude AI 기반
