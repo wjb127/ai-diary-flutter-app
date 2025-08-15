@@ -43,16 +43,38 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         return;
       }
 
-      // URL에서 recovery 토큰 확인 및 세션 복구
       final uri = Uri.base;
-      if (uri.fragment.isNotEmpty) {
-        // Fragment를 파싱하여 파라미터 추출
+      
+      // Query parameter에서 code 확인 (PKCE flow)
+      if (uri.queryParameters.containsKey('code')) {
+        final code = uri.queryParameters['code'];
+        if (code != null && code.isNotEmpty) {
+          try {
+            // code를 사용하여 세션 교환
+            final response = await Supabase.instance.client.auth.exchangeCodeForSession(code);
+            
+            if (response.session != null) {
+              setState(() {
+                _hasValidSession = true;
+              });
+            } else {
+              setState(() {
+                _errorMessage = '세션 복구에 실패했습니다. 링크가 만료되었을 수 있습니다.';
+              });
+            }
+          } catch (e) {
+            setState(() {
+              _errorMessage = '세션 복구 중 오류: ${e.toString()}';
+            });
+          }
+        }
+      } 
+      // Fragment에서 token 확인 (legacy flow)
+      else if (uri.fragment.isNotEmpty) {
         final params = Uri.splitQueryString(uri.fragment);
         
-        // recovery 타입인지 확인
         if (params['type'] == 'recovery' && params['access_token'] != null) {
           try {
-            // 세션 복구를 위해 getSessionFromUrl 호출
             final response = await Supabase.instance.client.auth.getSessionFromUrl(uri);
             
             if (response.session != null) {
