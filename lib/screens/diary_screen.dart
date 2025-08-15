@@ -842,9 +842,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
     
     try {
       if (_existingDiary != null && _generatedDiary != null) {
-        // 기존 일기 업데이트
+        // 기존 일기 업데이트 (제목, 원본 내용, AI 내용 모두 업데이트)
         await _diaryService.updateDiaryWithGenerated(
           diaryId: _existingDiary!.id,
+          title: _titleController.text.trim(),
+          originalContent: _contentController.text.trim(),
           generatedContent: _generatedDiary!,
         );
       } else if (_generatedDiary != null) {
@@ -858,6 +860,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
         // AI 각색 내용으로 업데이트
         await _diaryService.updateDiaryWithGenerated(
           diaryId: newDiary.id,
+          title: _titleController.text.trim(),
+          originalContent: _contentController.text.trim(),
           generatedContent: _generatedDiary!,
         );
       }

@@ -12,7 +12,7 @@ import 'screens/diary_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/splash_screen.dart';
-import 'screens/auth_screen.dart';
+import 'screens/simple_auth_screen.dart';
 import 'screens/admin_screen.dart';
 import 'screens/ai_disclaimer_screen.dart';
 import 'screens/reset_password_screen.dart';
@@ -82,7 +82,7 @@ final _router = GoRouter(
       path: '/auth',
       name: 'auth',
       builder: (context, state) => const ResponsiveWrapper(
-        child: AuthScreen(),
+        child: SimpleAuthScreen(),
       ),
     ),
     GoRoute(

@@ -89,11 +89,15 @@ class DiaryService {
 
   Future<DiaryEntry> updateDiaryWithGenerated({
     required String diaryId,
+    required String title,
+    required String originalContent,
     required String generatedContent,
   }) async {
     final response = await _supabase
         .from('diary_entries')
         .update({
+          'title': title,
+          'original_content': originalContent,
           'generated_content': generatedContent,
           'updated_at': DateTime.now().toIso8601String(),
         })
